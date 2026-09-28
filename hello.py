@@ -1,0 +1,1 @@
+print ("Alteryx Analyser: workspace ready")
