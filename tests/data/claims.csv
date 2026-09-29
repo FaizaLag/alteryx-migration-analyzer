@@ -1,0 +1,61 @@
+claim_id,member_id,case_id,service_date,proc_code,allowed_amount,steered_flag,navigator_note
+CL50001,M0013,C1041,2026-04-12,PROC-108,1564.96,N,Member chose original provider
+CL50002,M0040,C1017,2026-06-10,PROC-110,17096.98,Y,Ref NAV-2026-0255: steered to in-network facility
+CL50003,M0040,C1056,2026-09-23,PROC-107,"$11,012.14",N,Member chose original provider
+CL50004,M0013,C1052,2026-09-11,PROC-107,8246.63,Y,Ref NAV-2026-0881: steered to in-network facility
+CL50005,M0019,C1045,2026-09-18,PROC-105,10343.17,Y,Ref NAV-2026-0984: steered to in-network facility
+CL50006,M0030,C1012,2026-06-29,PROC-104,11352.89,Y,Ref NAV-2026-0084: steered to in-network facility
+CL50007,M0004,C1026,2026-09-12,PROC-103,10047.86,Y,ref#nav-2026-419; moved to lower cost site
+CL50008,M0019,C1059,2026-07-18,PROC-108,5419.85,Y,Ref NAV-2026-0724: steered to in-network facility
+CL50009,M0028,C1047,2026-04-16,PROC-102,12451.08,N,Member chose original provider
+CL50010,M0019,C1045,2026-08-19,PROC-102,9915.98,N,Member chose original provider
+CL50011,M0040,C1017,2026-07-23,PROC-102,1308.58,N,Member chose original provider
+CL50012,M0012,C1046,2026-08-25,PROC-102,8569.39,Y,Ref NAV-2026-0413: steered to in-network facility
+CL50013,M0013,C1050,2026-08-23,PROC-109,"$9,014.87",Y,Ref NAV-2026-0041: steered to in-network facility
+CL50014,M0007,C1034,2026-05-17,PROC-110,4694.03,Y,ref#nav-2026-985; moved to lower cost site
+CL50015,M0020,C1030,2026-07-31,PROC-110,964.11,N,Member chose original provider
+CL50016,M0012,C1046,2026-09-08,PROC-105,3471.43,Y,Ref NAV-2026-0651: steered to in-network facility
+CL50017,M0025,C1011,2026-09-09,PROC-111,8592.68,Y,Ref NAV-2026-0329: steered to in-network facility
+CL50018,M0030,C1012,2026-08-30,PROC-103,6104.02,N,Member chose original provider
+CL50019,M0040,C1056,2026-06-30,PROC-101,8323.16,Y,Ref NAV-2026-0332: steered to in-network facility
+CL50020,M0013,C1041,2026-07-21,PROC-109,14892.46,Y,Ref NAV-2026-0891: steered to in-network facility
+CL50021,M0028,C1047,2026-09-17,PROC-107,1212.12,Y,ref#nav-2026-638; moved to lower cost site
+CL50022,M0012,C1046,2026-08-26,PROC-101,3863.16,Y,"Steered to in-network facility, ref pending"
+CL50023,M0012,C1046,2026-09-28,PROC-108,"$2,405.31",N,Member chose original provider
+CL50024,M0004,C1026,2026-06-12,PROC-103,5765.81,Y,Ref NAV-2026-0418: steered to in-network facility
+CL50025,M0022,C1025,2026-06-17,PROC-102,8440.70,Y,Ref NAV-2026-0853: steered to in-network facility
+CL50026,M0033,C1049,2026-08-02,PROC-105,9282.48,Y,Ref NAV-2026-0855: steered to in-network facility
+CL50027,M0033,C1048,2026-09-26,PROC-104,8357.96,Y,Ref NAV-2026-0196: steered to in-network facility
+CL50028,M0013,C1050,2026-08-19,PROC-103,15586.48,Y,ref#nav-2026-809; moved to lower cost site
+CL50029,M0018,C1037,2026-07-04,PROC-109,4992.31,Y,Ref NAV-2026-0744: steered to in-network facility
+CL50030,M0034,C1058,2026-09-02,PROC-110,17980.52,Y,Ref NAV-2026-0153: steered to in-network facility
+CL50031,M0030,C1055,2026-08-16,PROC-108,6375.95,Y,Ref NAV-2026-0557: steered to in-network facility
+CL50032,M0028,C1047,2026-07-20,PROC-106,15685.43,N,Member chose original provider
+CL50033,M0022,C1025,2026-09-22,PROC-107,"$1,024.74",N,Member chose original provider
+CL50034,M0021,C1040,2026-04-08,PROC-107,17794.35,N,Member chose original provider
+CL50035,M0033,C1049,2026-04-26,PROC-101,2490.87,N,Member chose original provider
+CL50036,M0012,C1046,2026-08-17,PROC-102,9585.63,Y,Ref NAV-2026-0740: steered to in-network facility
+CL50037,M0033,C1044,2026-06-03,PROC-103,1578.20,N,Member chose original provider
+CL50038,M0006,C1060,2026-09-19,PROC-107,11784.60,N,Member chose original provider
+CL50039,M0030,C1055,2026-09-13,PROC-107,17185.98,N,Member chose original provider
+CL50040,M0030,C1055,2026-07-24,PROC-101,11209.91,Y,Ref NAV-2026-0701: steered to in-network facility
+CL50041,M0022,C1025,2026-08-27,PROC-102,7952.99,Y,Ref NAV-2026-0649: steered to in-network facility
+CL50042,M0030,C1012,2026-05-31,PROC-108,3202.97,Y,ref#nav-2026-30; moved to lower cost site
+CL50043,M0007,C1034,2026-07-13,PROC-101,"$5,457.28",Y,Ref NAV-2026-0150: steered to in-network facility
+CL50044,M0013,C1052,2026-08-15,PROC-111,7563.92,N,Member chose original provider
+CL50045,M0023,C1021,2026-06-24,PROC-102,11068.48,Y,Ref NAV-2026-0700: steered to in-network facility
+CL50046,M0033,C1049,2026-07-27,PROC-110,2790.34,Y,Ref NAV-2026-0261: steered to in-network facility
+CL50047,M0001,C1027,2026-09-21,PROC-101,16205.63,Y,Ref NAV-2026-0295: steered to in-network facility
+CL50048,M0030,C1055,2026-07-27,PROC-103,1561.05,N,Member chose original provider
+CL50049,M0019,C1045,2026-09-25,PROC-105,8358.84,Y,ref#nav-2026-394; moved to lower cost site
+CL50050,M0033,C1048,2026-09-06,PROC-102,4460.40,Y,Ref NAV-2026-0589: steered to in-network facility
+CL50051,M0010,C1032,2026-08-01,PROC-101,17608.51,N,Member chose original provider
+CL50052,M0031,C1057,2026-09-08,PROC-101,16413.45,N,Member chose original provider
+CL50053,M0022,C1025,2026-08-16,PROC-110,"$14,484.29",Y,Ref NAV-2026-0195: steered to in-network facility
+CL50054,M0001,C1027,2026-08-11,PROC-103,11401.40,N,Member chose original provider
+CL50055,M0012,C1033,2026-04-28,PROC-108,842.22,Y,"Steered to in-network facility, ref pending"
+CL50056,M0010,C1032,2026-09-20,PROC-106,13517.79,Y,ref#nav-2026-136; moved to lower cost site
+CL50057,M0030,C1055,2026-06-23,PROC-106,9672.63,N,Member chose original provider
+CL50058,M0001,C1027,2026-08-30,PROC-108,17421.07,Y,Ref NAV-2026-0892: steered to in-network facility
+CL50059,M0004,C1014,2026-04-03,PROC-108,17341.36,Y,Ref NAV-2026-0990: steered to in-network facility
+CL50060,M0013,C1041,2026-05-11,PROC-109,6742.51,N,Member chose original provider

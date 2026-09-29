@@ -1,0 +1,23 @@
+case_id,member_id,program_name,open_date,status
+C2201,M0018,Care Navigation,20-Sep-2026,open
+C2202,M0016,Maternity Support,03-Sep-2026,closed
+C2203,M0016,Maternity Support,18-Sep-2026,closed
+C2204,M0002,Care Navigation,15-Sep-2026,closed
+C2205,M0026,Surgery Support,08-Sep-2026,closed
+C2206,M0038,Second Opinion,22-Sep-2026,closed
+C2207,M0034,Second Opinion,18-Sep-2026,closed
+C2208,M0036,Second Opinion,24-Sep-2026,closed
+C2209,M0030,Second Opinion,23-Sep-2026,closed
+C2210,M0015,Care Navigation,09-Sep-2026,open
+C2211,M0008,Surgery Support,11-Sep-2026,open
+C2212,M0031,Second Opinion,07-Sep-2026,closed
+C2213,M0013,Second Opinion,04-Sep-2026,open
+C2214,M0012,Second Opinion,12-Sep-2026,open
+C2215,M0035,Surgery Support,23-Sep-2026,closed
+C2216,M0004,Second Opinion,02-Sep-2026,open
+C2217,M0032,Care Navigation,21-Sep-2026,open
+C2218,M0019,Maternity Support,19-Sep-2026,closed
+C2219,M0022,Surgery Support,15-Sep-2026,open
+C2220,M0031,Care Navigation,09-Sep-2026,open
+C2103,M0009,Maternity Support,08-Aug-2026,closed
+C2106,M0011,Second Opinion,25-Aug-2026,closed

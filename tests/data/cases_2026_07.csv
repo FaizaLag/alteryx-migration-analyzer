@@ -1,0 +1,19 @@
+case_id,member_id,program,open_date,status
+C2001,M0025,Surgery Support,07/08/2026,Open
+C2002,M0027,Maternity Support,07/03/2026,Closed
+C2003,M0030,Maternity Support,07/18/2026,Open
+C2004,M0027,Maternity Support,07/07/2026,Open
+C2005,M0037,Maternity Support,07/28/2026,Closed
+C2006,M0023,Second Opinion,07/01/2026,Closed
+C2007,M0027,Surgery Support,07/28/2026,Closed
+C2008,M0018,Maternity Support,07/08/2026,Closed
+C2009,M0025,Second Opinion,07/01/2026,Closed
+C2010,M0011,Maternity Support,07/24/2026,Open
+C2011,M0035,Care Navigation,07/20/2026,Closed
+C2012,M0037,Care Navigation,07/19/2026,Open
+C2013,M0028,Surgery Support,07/21/2026,Closed
+C2014,M0004,Second Opinion,07/06/2026,Closed
+C2015,M0014,Maternity Support,07/11/2026,Closed
+C2016,M0025,Second Opinion,07/11/2026,Closed
+C2017,M0006,Maternity Support,07/09/2026,Open
+C2018,M0035,Care Navigation,07/24/2026,Closed
