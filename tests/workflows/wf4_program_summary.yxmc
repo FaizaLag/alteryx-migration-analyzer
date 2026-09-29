@@ -1,0 +1,378 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2025.2" RunE2="T">
+  <Nodes>
+    <Node ToolID="1">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Questions.Tab.Tab">
+        <Position x="0" y="0" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="3">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+        <Position x="282" y="126" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Mode>Simple</Mode>
+          <Simple>
+            <Operator>=</Operator>
+            <Field>program</Field>
+            <Operands>
+              <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+              <DateType>fixed</DateType>
+              <PeriodDate>2026-09-29 15:12:32</PeriodDate>
+              <PeriodType>
+              </PeriodType>
+              <PeriodCount>0</PeriodCount>
+              <Operand>Care Navigation</Operand>
+              <StartDate>2026-09-29 15:12:32</StartDate>
+              <EndDate>2026-09-29 15:12:32</EndDate>
+            </Operands>
+          </Simple>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>[program] = "Care Navigation"</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="True">
+          <RecordInfo>
+            <Field name="claim_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="member_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="case_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="service_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="proc_code" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed_amount" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="steered_flag" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_note" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed" source="PythonTool:" type="Double" />
+            <Field name="ref_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="benchmark_cost" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="savings" source="PythonTool:" type="Double" />
+            <Field name="program" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="open_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="close_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="status" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="running_savings" source="PythonTool:" type="Double" />
+            <Field name="top_saver" source="PythonTool:" type="Bool" />
+          </RecordInfo>
+        </MetaInfo>
+        <MetaInfo connection="False">
+          <RecordInfo>
+            <Field name="claim_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="member_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="case_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="service_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="proc_code" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed_amount" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="steered_flag" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_note" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed" source="PythonTool:" type="Double" />
+            <Field name="ref_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="benchmark_cost" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="savings" source="PythonTool:" type="Double" />
+            <Field name="program" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="open_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="close_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="status" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="running_savings" source="PythonTool:" type="Double" />
+            <Field name="top_saver" source="PythonTool:" type="Bool" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+    </Node>
+    <Node ToolID="6">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+        <Position x="534" y="246" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SummarizeFields>
+            <SummarizeField field="program" action="GroupBy" rename="program" />
+            <SummarizeField field="savings" action="Sum" rename="Sum_savings" />
+            <SummarizeField field="claim_id" action="Count" rename="Count" />
+          </SummarizeFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="program" size="1073741823" source="Summarize: GroupBy - program" type="V_WString" />
+            <Field name="Sum_savings" source="Summarize: Sum - savings" type="Double" />
+            <Field name="Count" source="Summarize: Count - program" type="Int64" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+    </Node>
+    <Node ToolID="2">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.MacroInput.MacroInput">
+        <Position x="162" y="126" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <UseFileInput value="True" />
+          <Name>Input2</Name>
+          <Abbrev />
+          <ShowFieldMap value="False" />
+          <Optional value="False" />
+          <FileInput>
+            <Configuration>
+              <Passwords />
+              <File OutputFileName="" FileFormat="19" SearchSubDirs="False" RecordLimit="">C:\Users\user\Documents\Training\test_data\wf4_claim_savings.yxdb</File>
+              <FormatSpecificOptions />
+            </Configuration>
+          </FileInput>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Input</AnnotationText>
+          <DefaultAnnotationText>wf4_claim_savings.yxdb</DefaultAnnotationText>
+          <Left value="True" />
+        </Annotation>
+        <Dependencies>
+          <Implicit />
+        </Dependencies>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="claim_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="member_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="case_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="service_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="proc_code" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed_amount" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="steered_flag" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_note" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="allowed" source="PythonTool:" type="Double" />
+            <Field name="ref_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="benchmark_cost" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="savings" source="PythonTool:" type="Double" />
+            <Field name="program" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="open_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="close_date" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="status" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="navigator_id" size="1073741823" source="PythonTool:" type="V_WString" />
+            <Field name="running_savings" source="PythonTool:" type="Double" />
+            <Field name="top_saver" source="PythonTool:" type="Bool" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxMacroInput" />
+    </Node>
+    <Node ToolID="4">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Questions.ControlParam.ControlParam">
+        <Position x="690" y="18" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Configuration />
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Control Parameter (4)</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="5">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Action.Action">
+        <Position x="474" y="102" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Configuration />
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Update Value</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="7">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.MacroOutput.MacroOutput">
+        <Position x="654" y="246" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Name>Output7</Name>
+          <Abbrev />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Output</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxMacroOutput" />
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection>
+      <Origin ToolID="3" Connection="True" />
+      <Destination ToolID="6" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="6" Connection="Output" />
+      <Destination ToolID="7" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="2" Connection="Output" />
+      <Destination ToolID="3" Connection="Input" />
+    </Connection>
+    <Connection name="#2">
+      <Origin ToolID="5" Connection="Action" />
+      <Destination ToolID="3" Connection="Action" />
+    </Connection>
+    <Connection name="#1">
+      <Origin ToolID="4" Connection="Question" />
+      <Destination ToolID="5" Connection="Question" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <RunWithE2 value="True" />
+    <DefaultTZ value="Local" />
+    <PredictiveToolsCodePage value="1252" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <IsTemplate value="False" />
+    <Constants>
+      <Constant>
+        <Namespace>Question</Namespace>
+        <Name>ControlParam.Control Parameter (4)</Name>
+        <Value />
+        <IsNumeric value="False" />
+      </Constant>
+      <Constant>
+        <Namespace>Question</Namespace>
+        <Name>Macro Output (7)</Name>
+        <Value />
+        <IsNumeric value="False" />
+      </Constant>
+    </Constants>
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>wf4_program_summary</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+      <WorkflowId value="7af59277-f94c-487c-a722-7e2a6bc26c5e" />
+      <Telemetry>
+        <PreviousWorkflowId value="" />
+        <OriginWorkflowId value="7af59277-f94c-487c-a722-7e2a6bc26c5e" />
+      </Telemetry>
+      <PlatformWorkflowId value="" />
+    </MetaInfo>
+    <Events>
+      <Enabled value="False" />
+    </Events>
+    <RuntimeProperties>
+      <Actions>
+        <NoCondition>
+          <Type>NoCondition</Type>
+          <Description>(Always Run)</Description>
+          <True>
+            <Action>
+              <Type>UpdateValue</Type>
+              <Description />
+              <ToolId value="5" />
+              <Mode>Simple</Mode>
+              <Variable />
+              <Replace value="True" />
+              <ReplaceText>Care Navigation</ReplaceText>
+              <Destination>3/Simple/Operands/Operand</Destination>
+            </Action>
+          </True>
+        </NoCondition>
+      </Actions>
+      <Questions>
+        <Question>
+          <Type>Tab</Type>
+          <Description>Questions</Description>
+          <Name>Tab (1)</Name>
+          <ToolId value="1" />
+          <Questions>
+            <Question>
+              <Type>MacroInput</Type>
+              <Description>Macro Input (2)</Description>
+              <Name>Macro Input (2)</Name>
+              <ToolId value="2" />
+            </Question>
+            <Question>
+              <Type>ControlParam</Type>
+              <Description>Program</Description>
+              <Name>Control Parameter (4)</Name>
+              <ToolId value="4" />
+            </Question>
+            <Question>
+              <Type>MacroOutput</Type>
+              <Description>Macro Output (7)</Description>
+              <Name>Macro Output (7)</Name>
+              <ToolId value="7" />
+            </Question>
+          </Questions>
+        </Question>
+      </Questions>
+      <ModuleType>Macro</ModuleType>
+      <MacroCustomHelp value="False" />
+      <MacroDynamicOutputFields value="False" />
+      <MacroImageStd value="39" />
+      <MacroInputs />
+      <MacroOutputs />
+      <BatchMacro>
+        <OutputMode>AllSame</OutputMode>
+        <ControlParams>
+          <ControlParam>
+            <Name>Control Parameter (4)</Name>
+            <Description>Program</Description>
+          </ControlParam>
+        </ControlParams>
+      </BatchMacro>
+      <Wiz_CustomHelp value="False" />
+      <Wiz_CustomGraphic value="False" />
+      <Wiz_ShowOutput value="True" />
+      <Wiz_OpenOutputTools>
+        <Tool ToolId="2" Selected="True" />
+        <Tool ToolId="7" Selected="True" />
+      </Wiz_OpenOutputTools>
+      <Wiz_OutputMessage />
+      <Wiz_NoOutputFilesMessage />
+      <Wiz_ChainRunWizard />
+    </RuntimeProperties>
+  </Properties>
+</AlteryxDocument>
