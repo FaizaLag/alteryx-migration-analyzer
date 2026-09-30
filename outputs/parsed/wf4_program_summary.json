@@ -162,26 +162,5 @@
       "name": "#1"
     }
   ],
-  "comments": [
-    {
-      "tool_id": "2",
-      "kind": "tool_label",
-      "text": "Input"
-    },
-    {
-      "tool_id": "4",
-      "kind": "tool_label",
-      "text": "Control Parameter (4)"
-    },
-    {
-      "tool_id": "5",
-      "kind": "tool_label",
-      "text": "Update Value"
-    },
-    {
-      "tool_id": "7",
-      "kind": "tool_label",
-      "text": "Output"
-    }
-  ]
+  "comments": []
 }
