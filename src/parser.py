@@ -1,9 +1,16 @@
 """Parse Alteryx workflow files (.yxmd / .yxmc) into plain Python data.
 
-Usage: python src/parser.py <path-to-workflow>
+Usage:
+    python src/parser.py <workflow>               list tools with their settings
+    python src/parser.py <workflow> --raw <ID>    show one tool's raw XML settings
 """
+import json
 import sys
 import xml.etree.ElementTree as ET
+
+# Tools that build a macro's interface; they hold no data logic to migrate.
+INTERFACE_TOOLS = {"Tab", "ControlParam", "Action", "MacroInput", "MacroOutput",
+                   "TextBox", "DropDown", "CheckBox", "ListBox", "NumericUpDown"}
 
 
 def load_workflow(path):
@@ -11,8 +18,144 @@ def load_workflow(path):
     return ET.parse(path).getroot()
 
 
+# ---------- small helpers ----------
+
+def _text(parent, path):
+    """Text inside the element at `path`, or None."""
+    el = parent.find(path)
+    return el.text.strip() if el is not None and el.text and el.text.strip() else None
+
+
+def _attr(parent, path, name):
+    """Attribute `name` of the element at `path`, or None."""
+    el = parent.find(path)
+    return el.get(name) if el is not None else None
+
+
+def _leaf_values(cfg, limit=40):
+    """Fallback for tool types we don't know yet: every setting as 'path = value'."""
+    found = []
+
+    def walk(el, path):
+        for key, val in el.attrib.items():
+            found.append(f"{path}@{key} = {val}")
+        if el.text and el.text.strip():
+            found.append(f"{path} = {el.text.strip()[:200]}")
+        for child in el:
+            walk(child, f"{path}/{child.tag}")
+
+    for child in cfg:
+        walk(child, child.tag)
+    return found[:limit]
+
+
+# ---------- settings per tool type ----------
+
+def get_config(node, tool_type):
+    """Return the settings that hold a tool's logic, in a readable form."""
+    cfg = node.find("Properties/Configuration")
+    if tool_type in INTERFACE_TOOLS:
+        return {"interface_tool": True}
+    if cfg is None:
+        return {}
+
+    if tool_type in ("DbFileInput", "DbFileOutput"):
+        return {"file": _text(cfg, "File")}
+
+    if tool_type == "Filter":
+        return {
+            "mode": _text(cfg, "Mode"),
+            "expression": _text(cfg, "Expression"),
+            "simple": {
+                "field": _text(cfg, "Simple/Field"),
+                "operator": _text(cfg, "Simple/Operator"),
+                "value": _text(cfg, "Simple/Operands/Operand"),
+            },
+        }
+
+    if tool_type == "Formula":
+        return {"formulas": [
+            {"field": f.get("field"), "type": f.get("type"), "expression": f.get("expression")}
+            for f in cfg.findall("FormulaFields/FormulaField")
+        ]}
+
+    if tool_type == "MultiRowFormula":
+        return {
+            "new_field": _text(cfg, "CreateField_Name"),
+            "expression": _text(cfg, "Expression"),
+            "group_by": [f.get("field") for f in cfg.findall("GroupByFields/Field")],
+            "rows_that_dont_exist": _text(cfg, "OtherRows"),
+        }
+
+    if tool_type == "AlteryxSelect":
+        fields = cfg.findall("SelectFields/SelectField")
+        return {
+            "deselected": [f.get("field") for f in fields if f.get("selected") == "False"],
+            "renamed": {f.get("field"): f.get("rename") for f in fields if f.get("rename")},
+            "type_changes": {f.get("field"): f.get("type") for f in fields if f.get("type")},
+        }
+
+    if tool_type == "Join":
+        keys = {}
+        for info in cfg.findall("JoinInfo"):
+            keys[info.get("connection", "?").lower()] = [f.get("field") for f in info.findall("Field")]
+        return {"join_keys": keys}
+
+    if tool_type == "Union":
+        return {"mode": _text(cfg, "Mode")}
+
+    if tool_type == "Unique":
+        return {"unique_on": [f.get("field") for f in cfg.findall("UniqueFields/Field")]}
+
+    if tool_type == "Summarize":
+        return {"actions": [
+            {"field": f.get("field"), "action": f.get("action"), "rename": f.get("rename")}
+            for f in cfg.findall("SummarizeFields/SummarizeField")
+        ]}
+
+    if tool_type == "Sort":
+        return {"sort_by": [
+            {"field": f.get("field"), "order": f.get("order")}
+            for f in cfg.findall("SortInfo/Field")
+        ]}
+
+    if tool_type == "RegEx":
+        # Alteryx spells this tag "CaseInsensitve" in its files; accept both spellings.
+        case = _attr(cfg, "CaseInsensitve", "value") or _attr(cfg, "CaseInsensitive", "value")
+        return {
+            "field": _text(cfg, "Field"),
+            "expression": _attr(cfg, "RegExExpression", "value"),
+            "method": _text(cfg, "Method"),
+            "case_insensitive": case,
+        }
+
+    if tool_type == "JupyterCode":
+        return {"python_code": _python_code(cfg)}
+
+    if tool_type == "Macro":
+        return {"macro_settings": {v.get("name"): (v.text or "").strip() for v in cfg.findall("Value")}}
+
+    # Unknown tool type: keep everything so nothing is silently lost.
+    return {"unrecognized_settings": _leaf_values(cfg)}
+
+
+def _python_code(cfg):
+    """Pull the code cells out of the Python tool's embedded Jupyter notebook."""
+    for el in cfg.iter():
+        if el.tag.lower() == "notebook" and el.text:
+            try:
+                notebook = json.loads(el.text)
+            except json.JSONDecodeError:
+                return el.text.strip()[:2000]
+            cells = [c for c in notebook.get("cells", []) if c.get("cell_type") == "code"]
+            return "\n\n".join("".join(c.get("source", [])) for c in cells)
+    return None
+
+
+# ---------- tools ----------
+
 def get_tools(root):
-    """Return one dictionary per tool: its ID, type, plugin name, macro file, and position."""
+    """Return one dictionary per tool: ID, type, plugin, macro file, position, and settings."""
     tools = []
     # iter() finds every <Node>, including tools nested inside containers
     for node in root.iter("Node"):
@@ -42,13 +185,27 @@ def get_tools(root):
             "plugin": plugin or None,
             "macro": macro,
             "position": position,
+            "config": get_config(node, tool_type),
         })
     return tools
 
 
+def raw_config(root, tool_id):
+    """The untouched XML settings of one tool, for checking what the parser misses."""
+    for node in root.iter("Node"):
+        if node.get("ToolID") == str(tool_id):
+            cfg = node.find("Properties/Configuration")
+            return ET.tostring(cfg, encoding="unicode") if cfg is not None else "(no settings)"
+    return f"(no tool with ID {tool_id})"
+
+
 if __name__ == "__main__":
     root = load_workflow(sys.argv[1])
-    tools = get_tools(root)
-    for tool in tools:
-        print(tool)
-    print(f"{len(tools)} tools found")
+    if len(sys.argv) == 4 and sys.argv[2] == "--raw":
+        print(raw_config(root, sys.argv[3]))
+    else:
+        tools = get_tools(root)
+        for tool in tools:
+            print(f"--- Tool {tool['tool_id']}: {tool['type']}")
+            print(json.dumps(tool["config"], indent=2))
+        print(f"{len(tools)} tools found")
