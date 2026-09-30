@@ -1,0 +1,19 @@
+{
+  "file_name": "wf1_active_members.yxmd",
+  "counts": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+  },
+  "findings": [
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "1",
+      "where": "DbFileInput (tool 1)",
+      "evidence": "members.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    }
+  ]
+}
