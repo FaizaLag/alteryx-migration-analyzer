@@ -1,0 +1,62 @@
+{
+  "file_name": "wf1_active_members.yxmd",
+  "file_kind": "workflow",
+  "score": 2,
+  "total_points": 4,
+  "difficulty_counts": {
+    "high": 0,
+    "medium": 0,
+    "low": 4,
+    "none": 0
+  },
+  "unknown_tools": [],
+  "top_drivers": [
+    "Input Data (low, 1 pts)",
+    "Filter (low, 1 pts)",
+    "Select (low, 1 pts)",
+    "Output Data (low, 1 pts)"
+  ],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "2",
+      "type": "Filter",
+      "name": "Filter",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "WHERE clause",
+      "note": "Redshift string comparison is case-sensitive.",
+      "known": true
+    },
+    {
+      "tool_id": "3",
+      "type": "AlteryxSelect",
+      "name": "Select",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Column list with aliases and CAST",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "4",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    }
+  ],
+  "modifiers": []
+}

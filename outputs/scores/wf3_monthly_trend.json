@@ -1,0 +1,123 @@
+{
+  "file_name": "wf3_monthly_trend.yxmd",
+  "file_kind": "workflow",
+  "score": 6,
+  "total_points": 13,
+  "difficulty_counts": {
+    "high": 0,
+    "medium": 3,
+    "low": 7,
+    "none": 0
+  },
+  "unknown_tools": [],
+  "top_drivers": [
+    "Union (medium, 2 pts)",
+    "Formula (medium, 2 pts)",
+    "Unique (medium, 2 pts)",
+    "Input Data (low, 1 pts)",
+    "Input Data (low, 1 pts)"
+  ],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "2",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "3",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "4",
+      "type": "AlteryxSelect",
+      "name": "Select",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Column list with aliases and CAST",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "5",
+      "type": "Union",
+      "name": "Union",
+      "difficulty": "medium",
+      "points": 2,
+      "redshift": "UNION ALL",
+      "note": "SQL matches columns by position, not name.",
+      "known": true
+    },
+    {
+      "tool_id": "6",
+      "type": "Formula",
+      "name": "Formula",
+      "difficulty": "medium",
+      "points": 2,
+      "redshift": "Calculated columns (CASE, DATEDIFF, CAST, ...)",
+      "note": "Functions often differ in name, argument order, or null handling.",
+      "known": true
+    },
+    {
+      "tool_id": "7",
+      "type": "Unique",
+      "name": "Unique",
+      "difficulty": "medium",
+      "points": 2,
+      "redshift": "ROW_NUMBER() OVER (PARTITION BY ...) = 1",
+      "note": "Keeps the first row per key; plain DISTINCT is not equivalent.",
+      "known": true
+    },
+    {
+      "tool_id": "9",
+      "type": "Summarize",
+      "name": "Summarize",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "GROUP BY with aggregates",
+      "note": "Redshift AVG on integers returns an integer (truncates).",
+      "known": true
+    },
+    {
+      "tool_id": "10",
+      "type": "Sort",
+      "name": "Sort",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "ORDER BY",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "11",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    }
+  ],
+  "modifiers": []
+}

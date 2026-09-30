@@ -1,0 +1,215 @@
+{
+  "file_name": "wf4_savings_report.yxmd",
+  "file_kind": "workflow",
+  "score": 9,
+  "total_points": 40,
+  "difficulty_counts": {
+    "high": 2,
+    "medium": 4,
+    "low": 11,
+    "none": 0
+  },
+  "unknown_tools": [],
+  "top_drivers": [
+    "Python (high, 8 pts)",
+    "Macro (high, 6 pts)",
+    "RegEx (medium, 3 pts)",
+    "Multi-Row Formula (medium, 3 pts)",
+    "Formula (medium, 2 pts)"
+  ],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "2",
+      "type": "Formula",
+      "name": "Formula",
+      "difficulty": "medium",
+      "points": 2,
+      "redshift": "Calculated columns (CASE, DATEDIFF, CAST, ...)",
+      "note": "Functions often differ in name, argument order, or null handling.",
+      "known": true
+    },
+    {
+      "tool_id": "3",
+      "type": "RegEx",
+      "name": "RegEx",
+      "difficulty": "medium",
+      "points": 3,
+      "redshift": "REGEXP_SUBSTR / REGEXP_REPLACE",
+      "note": "Regex dialects and case-sensitivity settings differ.",
+      "known": true
+    },
+    {
+      "tool_id": "5",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "6",
+      "type": "Join",
+      "name": "Join",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "INNER / LEFT JOIN",
+      "note": "Unmatched outputs (L, R) need separate queries; see modifiers.",
+      "known": true
+    },
+    {
+      "tool_id": "8",
+      "type": "Formula",
+      "name": "Formula",
+      "difficulty": "medium",
+      "points": 2,
+      "redshift": "Calculated columns (CASE, DATEDIFF, CAST, ...)",
+      "note": "Functions often differ in name, argument order, or null handling.",
+      "known": true
+    },
+    {
+      "tool_id": "9",
+      "type": "DbFileInput",
+      "name": "Input Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "Table loaded via COPY from S3 (or an existing table)",
+      "note": "File inputs need a loading step; CSVs carry no data types.",
+      "known": true
+    },
+    {
+      "tool_id": "10",
+      "type": "Join",
+      "name": "Join",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "INNER / LEFT JOIN",
+      "note": "Unmatched outputs (L, R) need separate queries; see modifiers.",
+      "known": true
+    },
+    {
+      "tool_id": "11",
+      "type": "Sort",
+      "name": "Sort",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "ORDER BY",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "12",
+      "type": "MultiRowFormula",
+      "name": "Multi-Row Formula",
+      "difficulty": "medium",
+      "points": 3,
+      "redshift": "Window functions (LAG, LEAD, SUM OVER with a frame clause)",
+      "note": "Row-to-row logic depends on grouping and sort order.",
+      "known": true
+    },
+    {
+      "tool_id": "13",
+      "type": "JupyterCode",
+      "name": "Python",
+      "difficulty": "high",
+      "points": 8,
+      "redshift": "No equivalent; rewrite in SQL or run outside Redshift",
+      "note": "Redshift Python UDFs are no longer supported (after June 30, 2026).",
+      "known": true
+    },
+    {
+      "tool_id": "16",
+      "type": "Macro",
+      "name": "Macro",
+      "difficulty": "high",
+      "points": 6,
+      "redshift": "Depends on the macro's contents",
+      "note": "Logic lives in a separate file that must be analyzed on its own.",
+      "known": true
+    },
+    {
+      "tool_id": "17",
+      "type": "Summarize",
+      "name": "Summarize",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "GROUP BY with aggregates",
+      "note": "Redshift AVG on integers returns an integer (truncates).",
+      "known": true
+    },
+    {
+      "tool_id": "7",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "14",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "15",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    },
+    {
+      "tool_id": "18",
+      "type": "DbFileOutput",
+      "name": "Output Data",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "CREATE TABLE AS, INSERT INTO, or UNLOAD to S3",
+      "note": null,
+      "known": true
+    }
+  ],
+  "modifiers": [
+    {
+      "modifier": "extra_output",
+      "points": 1,
+      "note": "Each output beyond the first needs its own query or table."
+    },
+    {
+      "modifier": "extra_output",
+      "points": 1,
+      "note": "Each output beyond the first needs its own query or table."
+    },
+    {
+      "modifier": "extra_output",
+      "points": 1,
+      "note": "Each output beyond the first needs its own query or table."
+    },
+    {
+      "modifier": "unmatched_join_output",
+      "tool_id": "6",
+      "points": 2,
+      "note": "A Join's unmatched records (L or R) are used downstream."
+    }
+  ]
+}
