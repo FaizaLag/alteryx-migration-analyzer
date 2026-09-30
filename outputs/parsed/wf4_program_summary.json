@@ -1,0 +1,187 @@
+{
+  "file_name": "wf4_program_summary.yxmc",
+  "file_kind": "macro",
+  "alteryx_version": "2025.2",
+  "tool_count": 2,
+  "interface_tool_count": 5,
+  "macros_used": [],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "Tab",
+      "plugin": "AlteryxGuiToolkit.Questions.Tab.Tab",
+      "macro": null,
+      "position": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "config": {
+        "interface_tool": true
+      }
+    },
+    {
+      "tool_id": "3",
+      "type": "Filter",
+      "plugin": "AlteryxBasePluginsGui.Filter.Filter",
+      "macro": null,
+      "position": {
+        "x": 282.0,
+        "y": 126.0
+      },
+      "config": {
+        "mode": "Simple",
+        "expression": null,
+        "simple": {
+          "field": "program",
+          "operator": "=",
+          "value": "Care Navigation"
+        }
+      }
+    },
+    {
+      "tool_id": "6",
+      "type": "Summarize",
+      "plugin": "AlteryxSpatialPluginsGui.Summarize.Summarize",
+      "macro": null,
+      "position": {
+        "x": 534.0,
+        "y": 246.0
+      },
+      "config": {
+        "actions": [
+          {
+            "field": "program",
+            "action": "GroupBy",
+            "rename": "program"
+          },
+          {
+            "field": "savings",
+            "action": "Sum",
+            "rename": "Sum_savings"
+          },
+          {
+            "field": "claim_id",
+            "action": "Count",
+            "rename": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "2",
+      "type": "MacroInput",
+      "plugin": "AlteryxBasePluginsGui.MacroInput.MacroInput",
+      "macro": null,
+      "position": {
+        "x": 162.0,
+        "y": 126.0
+      },
+      "config": {
+        "interface_tool": true
+      }
+    },
+    {
+      "tool_id": "4",
+      "type": "ControlParam",
+      "plugin": "AlteryxGuiToolkit.Questions.ControlParam.ControlParam",
+      "macro": null,
+      "position": {
+        "x": 690.0,
+        "y": 18.0
+      },
+      "config": {
+        "interface_tool": true
+      }
+    },
+    {
+      "tool_id": "5",
+      "type": "Action",
+      "plugin": "AlteryxGuiToolkit.Action.Action",
+      "macro": null,
+      "position": {
+        "x": 474.0,
+        "y": 102.0
+      },
+      "config": {
+        "interface_tool": true
+      }
+    },
+    {
+      "tool_id": "7",
+      "type": "MacroOutput",
+      "plugin": "AlteryxBasePluginsGui.MacroOutput.MacroOutput",
+      "macro": null,
+      "position": {
+        "x": 654.0,
+        "y": 246.0
+      },
+      "config": {
+        "interface_tool": true
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from_tool": "3",
+      "from_anchor": "True",
+      "to_tool": "6",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "6",
+      "from_anchor": "Output",
+      "to_tool": "7",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "2",
+      "from_anchor": "Output",
+      "to_tool": "3",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "5",
+      "from_anchor": "Action",
+      "to_tool": "3",
+      "to_anchor": "Action",
+      "wireless": false,
+      "name": "#2"
+    },
+    {
+      "from_tool": "4",
+      "from_anchor": "Question",
+      "to_tool": "5",
+      "to_anchor": "Question",
+      "wireless": false,
+      "name": "#1"
+    }
+  ],
+  "comments": [
+    {
+      "tool_id": "2",
+      "kind": "tool_label",
+      "text": "Input"
+    },
+    {
+      "tool_id": "4",
+      "kind": "tool_label",
+      "text": "Control Parameter (4)"
+    },
+    {
+      "tool_id": "5",
+      "kind": "tool_label",
+      "text": "Update Value"
+    },
+    {
+      "tool_id": "7",
+      "kind": "tool_label",
+      "text": "Output"
+    }
+  ]
+}

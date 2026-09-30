@@ -1,0 +1,427 @@
+{
+  "file_name": "wf4_savings_report.yxmd",
+  "file_kind": "workflow",
+  "alteryx_version": "2025.2",
+  "tool_count": 17,
+  "interface_tool_count": 0,
+  "macros_used": [
+    {
+      "tool_id": "16",
+      "file": "wf4_program_summary.yxmc"
+    }
+  ],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 66.0,
+        "y": 102.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\claims.csv"
+      }
+    },
+    {
+      "tool_id": "2",
+      "type": "Formula",
+      "plugin": "AlteryxBasePluginsGui.Formula.Formula",
+      "macro": null,
+      "position": {
+        "x": 198.0,
+        "y": 102.0
+      },
+      "config": {
+        "formulas": [
+          {
+            "field": "allowed",
+            "type": "Double",
+            "expression": "ToNumber(Replace(Replace([allowed_amount], \"$\",\"\"),\",\",\"\"))"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "3",
+      "type": "RegEx",
+      "plugin": "AlteryxBasePluginsGui.RegEx.RegEx",
+      "macro": null,
+      "position": {
+        "x": 342.0,
+        "y": 102.0
+      },
+      "config": {
+        "field": "navigator_note",
+        "expression": "ref\\W+(nav-\\d{4}-\\d+)",
+        "method": "ParseComplex",
+        "case_insensitive": "True"
+      }
+    },
+    {
+      "tool_id": "5",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 342.0,
+        "y": 234.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\benchmarks.csv"
+      }
+    },
+    {
+      "tool_id": "6",
+      "type": "Join",
+      "plugin": "AlteryxBasePluginsGui.Join.Join",
+      "macro": null,
+      "position": {
+        "x": 498.0,
+        "y": 138.0
+      },
+      "config": {
+        "join_keys": {
+          "left": [
+            "proc_code"
+          ],
+          "right": [
+            "proc_code"
+          ]
+        }
+      }
+    },
+    {
+      "tool_id": "8",
+      "type": "Formula",
+      "plugin": "AlteryxBasePluginsGui.Formula.Formula",
+      "macro": null,
+      "position": {
+        "x": 630.0,
+        "y": 138.0
+      },
+      "config": {
+        "formulas": [
+          {
+            "field": "savings",
+            "type": "Double",
+            "expression": "IIF([steered_flag]=\"Y\", ToNumber([benchmark_cost]) - [allowed], 0)"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "9",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 630.0,
+        "y": 306.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\cases.csv"
+      }
+    },
+    {
+      "tool_id": "10",
+      "type": "Join",
+      "plugin": "AlteryxBasePluginsGui.Join.Join",
+      "macro": null,
+      "position": {
+        "x": 822.0,
+        "y": 222.0
+      },
+      "config": {
+        "join_keys": {
+          "left": [
+            "case_id"
+          ],
+          "right": [
+            "case_id"
+          ]
+        }
+      }
+    },
+    {
+      "tool_id": "11",
+      "type": "Sort",
+      "plugin": "AlteryxBasePluginsGui.Sort.Sort",
+      "macro": null,
+      "position": {
+        "x": 942.0,
+        "y": 222.0
+      },
+      "config": {
+        "sort_by": [
+          {
+            "field": "member_id",
+            "order": "Ascending"
+          },
+          {
+            "field": "service_date",
+            "order": "Ascending"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "12",
+      "type": "MultiRowFormula",
+      "plugin": "AlteryxBasePluginsGui.MultiRowFormula.MultiRowFormula",
+      "macro": null,
+      "position": {
+        "x": 1062.0,
+        "y": 222.0
+      },
+      "config": {
+        "new_field": "running_savings",
+        "expression": "IIF(IsNull([Row-1:running_savings]), \n[savings],[Row-1:running_savings] + [savings])",
+        "group_by": [
+          "member_id"
+        ],
+        "rows_that_dont_exist": "NULL"
+      }
+    },
+    {
+      "tool_id": "13",
+      "type": "JupyterCode",
+      "plugin": "JupyterCode",
+      "macro": null,
+      "position": {
+        "x": 1170.0,
+        "y": 222.0
+      },
+      "config": {
+        "python_code": "# List all non-standard packages to be imported by your \n# script here (only missing packages will be installed)\nfrom ayx import Package\n#Package.installPackages(['pandas','numpy'])\n\nfrom ayx import Alteryx\ndf = Alteryx.read(\"#1\")\ndf[\"top_saver\"] = df[\"savings\"] > df[\"savings\"].quantile(0.9)\nAlteryx.write(df,1)\n\n\n"
+      }
+    },
+    {
+      "tool_id": "16",
+      "type": "Macro",
+      "plugin": null,
+      "macro": "wf4_program_summary.yxmc",
+      "position": {
+        "x": 1506.0,
+        "y": 330.0
+      },
+      "config": {
+        "macro_settings": {
+          "BatchMacroGroupBy": "",
+          "ControlParams": "Control Parameter (4)=program"
+        }
+      }
+    },
+    {
+      "tool_id": "17",
+      "type": "Summarize",
+      "plugin": "AlteryxSpatialPluginsGui.Summarize.Summarize",
+      "macro": null,
+      "position": {
+        "x": 1362.0,
+        "y": 234.0
+      },
+      "config": {
+        "actions": [
+          {
+            "field": "program",
+            "action": "GroupBy",
+            "rename": "program"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "7",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 750.0,
+        "y": 18.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf4_unmatched_claims.csv"
+      }
+    },
+    {
+      "tool_id": "14",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 1350.0,
+        "y": 126.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf4_claim_savings.csv"
+      }
+    },
+    {
+      "tool_id": "15",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 1350.0,
+        "y": 18.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf4_claim_savings.yxdb"
+      }
+    },
+    {
+      "tool_id": "18",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 1602.0,
+        "y": 330.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf4_program_summary.csv"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from_tool": "1",
+      "from_anchor": "Output",
+      "to_tool": "2",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "2",
+      "from_anchor": "Output",
+      "to_tool": "3",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "3",
+      "from_anchor": "Output",
+      "to_tool": "6",
+      "to_anchor": "Left",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "5",
+      "from_anchor": "Output",
+      "to_tool": "6",
+      "to_anchor": "Right",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "6",
+      "from_anchor": "Left",
+      "to_tool": "7",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "6",
+      "from_anchor": "Join",
+      "to_tool": "8",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "8",
+      "from_anchor": "Output",
+      "to_tool": "10",
+      "to_anchor": "Left",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "9",
+      "from_anchor": "Output",
+      "to_tool": "10",
+      "to_anchor": "Right",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "10",
+      "from_anchor": "Join",
+      "to_tool": "11",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "11",
+      "from_anchor": "Output",
+      "to_tool": "12",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "12",
+      "from_anchor": "Output",
+      "to_tool": "13",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": "#1"
+    },
+    {
+      "from_tool": "13",
+      "from_anchor": "Output1",
+      "to_tool": "14",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "13",
+      "from_anchor": "Output1",
+      "to_tool": "15",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "13",
+      "from_anchor": "Output1",
+      "to_tool": "17",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "13",
+      "from_anchor": "Output1",
+      "to_tool": "16",
+      "to_anchor": "Input2",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "17",
+      "from_anchor": "Output",
+      "to_tool": "16",
+      "to_anchor": "Control",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "16",
+      "from_anchor": "Output7",
+      "to_tool": "18",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    }
+  ],
+  "comments": []
+}
