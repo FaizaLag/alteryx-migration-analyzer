@@ -228,6 +228,9 @@ def get_comments(root):
             if text:
                 comments.append({"tool_id": node.get("ToolID"), "kind": "comment", "text": text})
             continue
+        # Interface tools carry their own names as labels (e.g. "Input"); not developer comments
+        if plugin.split(".")[-1] in INTERFACE_TOOLS:
+            continue
         # A label typed by the developer, as opposed to Alteryx's automatic one
         label = _text(node, "Properties/Annotation/AnnotationText")
         if label:
