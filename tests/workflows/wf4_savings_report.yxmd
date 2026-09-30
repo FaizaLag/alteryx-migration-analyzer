@@ -8,7 +8,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\claims.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -30,14 +30,14 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="claim_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="case_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="service_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="proc_code" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="allowed_amount" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="steered_flag" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
-            <Field name="navigator_note" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\claims.csv" type="V_String" />
+            <Field name="claim_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="case_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="service_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="proc_code" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="allowed_amount" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="steered_flag" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
+            <Field name="navigator_note" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\claims.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -104,7 +104,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\benchmarks.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\benchmarks.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -126,8 +126,8 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="proc_code" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\benchmarks.csv" type="V_String" />
-            <Field name="benchmark_cost" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\benchmarks.csv" type="V_String" />
+            <Field name="proc_code" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\benchmarks.csv" type="V_String" />
+            <Field name="benchmark_cost" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\data\benchmarks.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -190,7 +190,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\cases.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -212,13 +212,13 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="case_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="program" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="open_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="close_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="status" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
-            <Field name="navigator_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases.csv" type="V_String" />
+            <Field name="case_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="program" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="open_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="close_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="status" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
+            <Field name="navigator_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -310,7 +310,7 @@ service_date - Ascending</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <WorkflowName>c:\users\user\Documents\training\wf4_savings_report.yxmd</WorkflowName>
+          <WorkflowName>C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\workflows\wf4_savings_report.yxmd</WorkflowName>
           <JupyterProduction>false</JupyterProduction>
           <vEnvName>designerbasetools_venv</vEnvName>
           <DefaultVenv>1</DefaultVenv>
@@ -404,7 +404,7 @@ service_date - Ascending</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="0">C:\Users\user\Documents\Training\test_data\wf4_unmatched_claims.csv</File>
+          <File MaxRecords="" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf4_unmatched_claims.csv</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>
@@ -435,7 +435,7 @@ service_date - Ascending</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="0">C:\Users\user\Documents\Training\test_data\wf4_claim_savings.csv</File>
+          <File MaxRecords="" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf4_claim_savings.csv</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>
@@ -466,7 +466,7 @@ service_date - Ascending</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="19">C:\Users\user\Documents\Training\test_data\wf4_claim_savings.yxdb</File>
+          <File MaxRecords="" FileFormat="19">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf4_claim_savings.yxdb</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>
@@ -494,7 +494,7 @@ service_date - Ascending</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="0">C:\Users\user\Documents\Training\test_data\wf4_program_summary.csv</File>
+          <File MaxRecords="" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf4_program_summary.csv</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>
