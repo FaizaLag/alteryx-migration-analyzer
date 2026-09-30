@@ -4,9 +4,12 @@ Usage:
     python src/parser.py <workflow>               tools and connections (summary)
     python src/parser.py <workflow> --config      every tool's settings in detail
     python src/parser.py <workflow> --raw <ID>    one tool's raw XML settings
+    python src/parser.py <workflow or folder> --save
+                                                  write JSON to outputs/parsed/
 """
 import json
 import sys
+from pathlib import Path
 import xml.etree.ElementTree as ET
 
 # Tools that build a macro's interface; they hold no data logic to migrate.
@@ -203,13 +206,62 @@ def get_connections(root):
             continue
         connections.append({
             "from_tool": origin.get("ToolID"),
-            "from_anchor": origin.get("Connection"),   # e.g. Output, True, False, J, L, R
+            "from_anchor": origin.get("Connection"),   # e.g. Output, True, False, Join, Left, Right
             "to_tool": dest.get("ToolID"),
             "to_anchor": dest.get("Connection"),       # e.g. Input, Left, Right, Question
             "wireless": conn.get("Wireless") == "True",  # hidden connections on the canvas
             "name": conn.get("name"),                  # e.g. "#1", used by Python and multi-input tools
         })
     return connections
+
+
+# ---------- comments ----------
+
+def get_comments(root):
+    """Text a developer wrote on the canvas: Comment tools and custom tool labels."""
+    comments = []
+    for node in root.iter("Node"):
+        gui = node.find("GuiSettings")
+        plugin = gui.get("Plugin", "") if gui is not None else ""
+        if plugin.endswith("TextBox"):
+            text = _text(node, "Properties/Configuration/Text")
+            if text:
+                comments.append({"tool_id": node.get("ToolID"), "kind": "comment", "text": text})
+            continue
+        # A label typed by the developer, as opposed to Alteryx's automatic one
+        label = _text(node, "Properties/Annotation/AnnotationText")
+        if label:
+            comments.append({"tool_id": node.get("ToolID"), "kind": "tool_label", "text": label})
+    return comments
+
+
+# ---------- whole workflow ----------
+
+def parse_workflow(path):
+    """Everything the analyzer needs from one workflow file, in one dictionary."""
+    path = Path(path)
+    root = load_workflow(path)
+    tools = get_tools(root)
+    return {
+        "file_name": path.name,
+        "file_kind": "macro" if path.suffix.lower() == ".yxmc" else "workflow",
+        "alteryx_version": root.get("yxmdVer"),
+        "tool_count": sum(1 for t in tools if not t["config"].get("interface_tool")),
+        "interface_tool_count": sum(1 for t in tools if t["config"].get("interface_tool")),
+        "macros_used": [{"tool_id": t["tool_id"], "file": t["macro"]} for t in tools if t["macro"]],
+        "tools": tools,
+        "connections": get_connections(root),
+        "comments": get_comments(root),
+    }
+
+
+def save_json(path, out_dir="outputs/parsed"):
+    """Parse one workflow and write it to <out_dir>/<name>.json."""
+    result = parse_workflow(path)
+    out = Path(out_dir) / (Path(path).stem + ".json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    return out, result
 
 
 def raw_config(root, tool_id):
@@ -222,8 +274,19 @@ def raw_config(root, tool_id):
 
 
 if __name__ == "__main__":
-    root = load_workflow(sys.argv[1])
+    target = Path(sys.argv[1])
     args = sys.argv[2:]
+
+    if args == ["--save"]:
+        files = sorted(target.iterdir()) if target.is_dir() else [target]
+        files = [f for f in files if f.suffix.lower() in (".yxmd", ".yxmc")]
+        for f in files:
+            out, r = save_json(f)
+            print(f"{f.name}: {r['tool_count']} tools, {r['interface_tool_count']} interface tools, "
+                  f"{len(r['connections'])} connections, {len(r['comments'])} comments -> {out}")
+        sys.exit()
+
+    root = load_workflow(target)
 
     if len(args) == 2 and args[0] == "--raw":
         print(raw_config(root, args[1]))
@@ -247,4 +310,9 @@ if __name__ == "__main__":
         hidden = "  (wireless)" if c["wireless"] else ""
         print(f"  {c['from_tool']:>3} {names.get(c['from_tool'], '?')} [{c['from_anchor']}]"
               f"  ->  {c['to_tool']} {names.get(c['to_tool'], '?')} [{c['to_anchor']}]{hidden}")
-    print(f"{len(tools)} tools, {len(connections)} connections")
+    comments = get_comments(root)
+    if comments:
+        print("COMMENTS")
+        for c in comments:
+            print(f"  {c['tool_id']:>3} ({c['kind']}): {c['text']}")
+    print(f"{len(tools)} tools, {len(connections)} connections, {len(comments)} comments")
