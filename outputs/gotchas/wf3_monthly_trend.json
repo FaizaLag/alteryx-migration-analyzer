@@ -1,0 +1,145 @@
+{
+  "file_name": "wf3_monthly_trend.yxmd",
+  "counts": {
+    "high": 2,
+    "medium": 5,
+    "low": 8
+  },
+  "findings": [
+    {
+      "check": "multiple_date_formats",
+      "severity": "high",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field open_dt",
+      "evidence": "IIF(Contains([open_date], \"/\"), DateTimeParse([open_date],\"%m/%d/%Y\"), IIF(Length([open_date]) = 11, DateTimeParse([open_date],\"%d-%b-%Y\"), DateTimeParse([open_date],\"%Y/%m/%d\")))",
+      "message": "Several date formats are parsed in one expression, so the source data mixes formats.",
+      "redshift": "Handle each format explicitly. Alteryx can tolerate small format mismatches (such as separators) that a literal SQL translation may not; test every format."
+    },
+    {
+      "check": "unique_keep_first",
+      "severity": "high",
+      "tool_id": "7",
+      "where": "Unique (tool 7)",
+      "evidence": "Unique on: case_id",
+      "message": "Unique keeps the FIRST row per key; which row is first depends on the order data arrives.",
+      "redshift": "ROW_NUMBER() OVER (PARTITION BY key ORDER BY ...) = 1 with an explicit ORDER BY. Plain DISTINCT only removes fully identical rows."
+    },
+    {
+      "check": "contains",
+      "severity": "medium",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field open_dt",
+      "evidence": "IIF(Contains([open_date], \"/\"), DateTimeParse([open_date],\"%m/%d/%Y\"), IIF(Length([open_date]) = 11, DateTimeParse([open_date],\"%d-%b-%Y\"), DateTimeParse([open_date],\"%Y/%m/%d\")))",
+      "message": "Text search inside a string; case sensitivity may differ.",
+      "redshift": "POSITION(...) > 0 or LIKE / ILIKE. Confirm whether matching should ignore case."
+    },
+    {
+      "check": "datetime_parse",
+      "severity": "medium",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field open_dt",
+      "evidence": "IIF(Contains([open_date], \"/\"), DateTimeParse([open_date],\"%m/%d/%Y\"), IIF(Length([open_date]) = 11, DateTimeParse([open_date],\"%d-%b-%Y\"), DateTimeParse([open_date],\"%Y/%m/%d\")))",
+      "message": "Converts text to dates using Alteryx format codes (%Y, %m, %d, %b).",
+      "redshift": "TO_DATE or TO_TIMESTAMP with Redshift format codes (YYYY, MM, DD, MON)."
+    },
+    {
+      "check": "is_empty",
+      "severity": "medium",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field member_id",
+      "evidence": "IIF(IsEmpty([member_id]), \"UNKNOWN\", [member_id])",
+      "message": "IsEmpty is true for both NULL and empty text; SQL treats these separately.",
+      "redshift": "(x IS NULL OR x = ''), or COALESCE(NULLIF(x, ''), ...)."
+    },
+    {
+      "check": "rename_before_union",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Select (tool 4)",
+      "evidence": "program_name -> program",
+      "message": "A column is renamed right before a Union, so the sources use different column names.",
+      "redshift": "Apply the same alias in that SELECT before the UNION ALL."
+    },
+    {
+      "check": "union_by_name",
+      "severity": "medium",
+      "tool_id": "5",
+      "where": "Union (tool 5)",
+      "evidence": "Mode: ByName",
+      "message": "Union matches columns by name.",
+      "redshift": "UNION ALL matches columns by position. List columns in the same order in every SELECT."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "1",
+      "where": "DbFileInput (tool 1)",
+      "evidence": "cases_2026_07.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "2",
+      "where": "DbFileInput (tool 2)",
+      "evidence": "cases_2026_08.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "3",
+      "where": "DbFileInput (tool 3)",
+      "evidence": "cases_2026_09.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "datetime_format",
+      "severity": "low",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field case_month",
+      "evidence": "DateTimeFormat([open_dt],\"%Y-%m\")",
+      "message": "Formats dates as text using Alteryx format codes.",
+      "redshift": "TO_CHAR with Redshift format codes (e.g. 'YYYY-MM')."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field open_dt",
+      "evidence": "IIF(Contains([open_date], \"/\"), DateTimeParse([open_date],\"%m/%d/%Y\"), IIF(Length([open_date]) = 11, DateTimeParse([open_date],\"%d-%b-%Y\"), DateTimeParse([open_date],\"%Y/%m/%d\")))",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field member_id",
+      "evidence": "IIF(IsEmpty([member_id]), \"UNKNOWN\", [member_id])",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    },
+    {
+      "check": "length",
+      "severity": "low",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field open_dt",
+      "evidence": "IIF(Contains([open_date], \"/\"), DateTimeParse([open_date],\"%m/%d/%Y\"), IIF(Length([open_date]) = 11, DateTimeParse([open_date],\"%d-%b-%Y\"), DateTimeParse([open_date],\"%Y/%m/%d\")))",
+      "message": "String length, here possibly used to detect a format.",
+      "redshift": "LEN or LENGTH."
+    },
+    {
+      "check": "title_case",
+      "severity": "low",
+      "tool_id": "6",
+      "where": "Formula (tool 6), field status",
+      "evidence": "TitleCase([status])",
+      "message": "Capitalizes words to normalize inconsistent text.",
+      "redshift": "INITCAP. Results can differ for some words; spot-check the output."
+    }
+  ]
+}

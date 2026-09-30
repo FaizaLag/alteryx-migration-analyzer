@@ -1,0 +1,154 @@
+{
+  "file_name": "wf4_savings_report.yxmd",
+  "counts": {
+    "high": 2,
+    "medium": 8,
+    "low": 6
+  },
+  "findings": [
+    {
+      "check": "macro_dependency",
+      "severity": "high",
+      "tool_id": "16",
+      "where": "Macro (tool 16)",
+      "evidence": "wf4_program_summary.yxmc",
+      "message": "Calls a macro, whose logic lives in a separate file.",
+      "redshift": "Analyze the macro file on its own; it must be migrated too."
+    },
+    {
+      "check": "python_tool",
+      "severity": "high",
+      "tool_id": "13",
+      "where": "JupyterCode (tool 13)",
+      "evidence": "from ayx import Alteryx | df = Alteryx.read(\"#1\") | df[\"top_saver\"] = df[\"savings\"] > df[\"savings\"].quantile(0.9) | Alteryx.write(df,1)",
+      "message": "Runs Python code, which has no SQL equivalent.",
+      "redshift": "Rewrite the logic in SQL if possible, or run it outside Redshift. Python UDFs are no longer supported (after June 30, 2026)."
+    },
+    {
+      "check": "join_unmatched_used",
+      "severity": "medium",
+      "tool_id": "6",
+      "where": "Join (tool 6)",
+      "evidence": "Unmatched Left output used",
+      "message": "Unmatched Join records (L or R output) are used downstream.",
+      "redshift": "LEFT JOIN ... WHERE right_key IS NULL, as a separate query."
+    },
+    {
+      "check": "regex_case_insensitive",
+      "severity": "medium",
+      "tool_id": "3",
+      "where": "RegEx (tool 3)",
+      "evidence": "Case insensitive: True",
+      "message": "The RegEx tool is set to ignore case.",
+      "redshift": "Redshift regex is case-sensitive by default; add the 'i' parameter."
+    },
+    {
+      "check": "regex_parse_group",
+      "severity": "medium",
+      "tool_id": "3",
+      "where": "RegEx (tool 3)",
+      "evidence": "Method: ParseComplex",
+      "message": "The RegEx tool extracts part of the match (a capture group).",
+      "redshift": "REGEXP_SUBSTR returns the whole match unless the 'e' parameter is added."
+    },
+    {
+      "check": "regex_tool",
+      "severity": "medium",
+      "tool_id": "3",
+      "where": "RegEx (tool 3)",
+      "evidence": "ref\\W+(nav-\\d{4}-\\d+)",
+      "message": "Uses a regular expression, and Redshift's default regex dialect differs from Alteryx's.",
+      "redshift": "REGEXP_SUBSTR. Redshift uses POSIX by default; add the 'p' parameter for Perl-style patterns (\\d, \\W, ...)."
+    },
+    {
+      "check": "row_reference",
+      "severity": "medium",
+      "tool_id": "12",
+      "where": "Multi-Row Formula (tool 12), field running_savings",
+      "evidence": "IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])",
+      "message": "Refers to values in other rows (e.g. a running total).",
+      "redshift": "Window functions (LAG, LEAD, or SUM(...) OVER (PARTITION BY ... ORDER BY ... ROWS UNBOUNDED PRECEDING)). Redshift requires the frame clause when the window has ORDER BY."
+    },
+    {
+      "check": "text_cleaned_before_number",
+      "severity": "medium",
+      "tool_id": "2",
+      "where": "Formula (tool 2), field allowed",
+      "evidence": "ToNumber(Replace(Replace([allowed_amount], \"$\",\"\"),\",\",\"\"))",
+      "message": "Numbers arrive as formatted text (e.g. currency symbols, commas) and are cleaned before conversion.",
+      "redshift": "Clean with REPLACE before CAST, or load the column with the right type. Every format in the data must be covered."
+    },
+    {
+      "check": "to_number",
+      "severity": "medium",
+      "tool_id": "2",
+      "where": "Formula (tool 2), field allowed",
+      "evidence": "ToNumber(Replace(Replace([allowed_amount], \"$\",\"\"),\",\",\"\"))",
+      "message": "Converts text to numbers. A value that isn't a valid number can behave differently.",
+      "redshift": "CAST(x AS DECIMAL(...)). In Redshift, invalid text makes the whole query fail."
+    },
+    {
+      "check": "to_number",
+      "severity": "medium",
+      "tool_id": "8",
+      "where": "Formula (tool 8), field savings",
+      "evidence": "IIF([steered_flag]=\"Y\", ToNumber([benchmark_cost]) - [allowed], 0)",
+      "message": "Converts text to numbers. A value that isn't a valid number can behave differently.",
+      "redshift": "CAST(x AS DECIMAL(...)). In Redshift, invalid text makes the whole query fail."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "1",
+      "where": "DbFileInput (tool 1)",
+      "evidence": "claims.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "5",
+      "where": "DbFileInput (tool 5)",
+      "evidence": "benchmarks.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "9",
+      "where": "DbFileInput (tool 9)",
+      "evidence": "cases.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "8",
+      "where": "Formula (tool 8), field savings",
+      "evidence": "IIF([steered_flag]=\"Y\", ToNumber([benchmark_cost]) - [allowed], 0)",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "12",
+      "where": "Multi-Row Formula (tool 12), field running_savings",
+      "evidence": "IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    },
+    {
+      "check": "is_null",
+      "severity": "low",
+      "tool_id": "12",
+      "where": "Multi-Row Formula (tool 12), field running_savings",
+      "evidence": "IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])",
+      "message": "Null check.",
+      "redshift": "x IS NULL."
+    }
+  ]
+}

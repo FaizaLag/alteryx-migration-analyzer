@@ -1,0 +1,91 @@
+{
+  "file_name": "wf2_cases_by_member.yxmd",
+  "counts": {
+    "high": 1,
+    "medium": 4,
+    "low": 4
+  },
+  "findings": [
+    {
+      "check": "avg_of_integer",
+      "severity": "high",
+      "tool_id": "5",
+      "where": "Summarize (tool 5)",
+      "evidence": "Avg of days_open (Int32)",
+      "message": "Averages a whole-number field. Redshift's AVG on integers returns an integer, dropping the decimals.",
+      "redshift": "CAST the field to DECIMAL (or FLOAT) before AVG."
+    },
+    {
+      "check": "datetime_diff",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field days_open",
+      "evidence": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))",
+      "message": "DateTimeDiff(end, start, unit) puts the dates in the opposite order to Redshift.",
+      "redshift": "DATEDIFF(unit, start, end). Check the sign of the result."
+    },
+    {
+      "check": "datetime_today",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field days_open",
+      "evidence": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))",
+      "message": "Uses today's date, so results change every day.",
+      "redshift": "CURRENT_DATE or GETDATE(). Pin a fixed date when comparing old and new outputs."
+    },
+    {
+      "check": "is_empty",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field days_open",
+      "evidence": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))",
+      "message": "IsEmpty is true for both NULL and empty text; SQL treats these separately.",
+      "redshift": "(x IS NULL OR x = ''), or COALESCE(NULLIF(x, ''), ...)."
+    },
+    {
+      "check": "to_number",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field age_band",
+      "evidence": "IIF(2026- ToNumber([birth_year]) >= 65, \"Senior\", \"Adult\")",
+      "message": "Converts text to numbers. A value that isn't a valid number can behave differently.",
+      "redshift": "CAST(x AS DECIMAL(...)). In Redshift, invalid text makes the whole query fail."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "1",
+      "where": "DbFileInput (tool 1)",
+      "evidence": "members.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "csv_input",
+      "severity": "low",
+      "tool_id": "2",
+      "where": "DbFileInput (tool 2)",
+      "evidence": "cases.csv",
+      "message": "Reads a CSV file, which carries no data types.",
+      "redshift": "Load with COPY into a table whose column types are defined explicitly."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field days_open",
+      "evidence": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    },
+    {
+      "check": "iif",
+      "severity": "low",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field age_band",
+      "evidence": "IIF(2026- ToNumber([birth_year]) >= 65, \"Senior\", \"Adult\")",
+      "message": "IIF has no Redshift equivalent.",
+      "redshift": "Rewrite as CASE WHEN ... THEN ... ELSE ... END."
+    }
+  ]
+}
