@@ -8,7 +8,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -30,11 +30,11 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="case_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv" type="V_String" />
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv" type="V_String" />
-            <Field name="program" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv" type="V_String" />
-            <Field name="open_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv" type="V_String" />
-            <Field name="status" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_07.csv" type="V_String" />
+            <Field name="case_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv" type="V_String" />
+            <Field name="program" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv" type="V_String" />
+            <Field name="open_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv" type="V_String" />
+            <Field name="status" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_07.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -47,7 +47,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -69,11 +69,11 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="case_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv" type="V_String" />
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv" type="V_String" />
-            <Field name="program" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv" type="V_String" />
-            <Field name="open_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv" type="V_String" />
-            <Field name="status" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_08.csv" type="V_String" />
+            <Field name="case_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv" type="V_String" />
+            <Field name="program" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv" type="V_String" />
+            <Field name="open_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv" type="V_String" />
+            <Field name="status" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_08.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -86,7 +86,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -108,11 +108,11 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="case_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv" type="V_String" />
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv" type="V_String" />
-            <Field name="program_name" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv" type="V_String" />
-            <Field name="open_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv" type="V_String" />
-            <Field name="status" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\cases_2026_09.csv" type="V_String" />
+            <Field name="case_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv" type="V_String" />
+            <Field name="program_name" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv" type="V_String" />
+            <Field name="open_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv" type="V_String" />
+            <Field name="status" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\cases_2026_09.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -242,7 +242,7 @@ DateTimeParse([open_date],"%m/%d/%Y"),...</DefaultAnnotationText>
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="0">C:\Users\user\Documents\Training\test_data\wf3_monthly_trend.csv</File>
+          <File MaxRecords="" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf3_monthly_trend.csv</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>

@@ -8,7 +8,7 @@
       <Properties>
         <Configuration>
           <Passwords />
-          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\user\Documents\Training\test_data\tests\data\members.csv</File>
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv</File>
           <FormatSpecificOptions>
             <CodePage>28591</CodePage>
             <Delimeter>,</Delimeter>
@@ -30,13 +30,13 @@
         </Dependencies>
         <MetaInfo connection="Output">
           <RecordInfo>
-            <Field name="member_id" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="birth_year" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="region" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="plan_type" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="status" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="enroll_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
-            <Field name="term_date" size="254" source="File: C:\Users\user\Documents\Training\test_data\tests\data\members.csv" type="V_String" />
+            <Field name="member_id" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="birth_year" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="region" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="plan_type" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="status" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="enroll_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
+            <Field name="term_date" size="254" source="File: C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\data\members.csv" type="V_String" />
           </RecordInfo>
         </MetaInfo>
       </Properties>
@@ -102,7 +102,7 @@
       </GuiSettings>
       <Properties>
         <Configuration>
-          <File MaxRecords="" FileFormat="0">C:\Users\user\Documents\Training\test_data\wf1_active_members.csv</File>
+          <File MaxRecords="" FileFormat="0">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf1_active_members.csv</File>
           <Passwords />
           <Disable>False</Disable>
           <FormatSpecificOptions>
