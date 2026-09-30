@@ -1,8 +1,9 @@
 """Parse Alteryx workflow files (.yxmd / .yxmc) into plain Python data.
 
 Usage:
-    python src/parser.py <workflow>               list tools with their settings
-    python src/parser.py <workflow> --raw <ID>    show one tool's raw XML settings
+    python src/parser.py <workflow>               tools and connections (summary)
+    python src/parser.py <workflow> --config      every tool's settings in detail
+    python src/parser.py <workflow> --raw <ID>    one tool's raw XML settings
 """
 import json
 import sys
@@ -190,6 +191,27 @@ def get_tools(root):
     return tools
 
 
+# ---------- connections ----------
+
+def get_connections(root):
+    """Return one dictionary per connection: which tool and anchor it leaves, and where it arrives."""
+    connections = []
+    for conn in root.findall("./Connections/Connection"):
+        origin = conn.find("Origin")
+        dest = conn.find("Destination")
+        if origin is None or dest is None:
+            continue
+        connections.append({
+            "from_tool": origin.get("ToolID"),
+            "from_anchor": origin.get("Connection"),   # e.g. Output, True, False, J, L, R
+            "to_tool": dest.get("ToolID"),
+            "to_anchor": dest.get("Connection"),       # e.g. Input, Left, Right, Question
+            "wireless": conn.get("Wireless") == "True",  # hidden connections on the canvas
+            "name": conn.get("name"),                  # e.g. "#1", used by Python and multi-input tools
+        })
+    return connections
+
+
 def raw_config(root, tool_id):
     """The untouched XML settings of one tool, for checking what the parser misses."""
     for node in root.iter("Node"):
@@ -201,11 +223,28 @@ def raw_config(root, tool_id):
 
 if __name__ == "__main__":
     root = load_workflow(sys.argv[1])
-    if len(sys.argv) == 4 and sys.argv[2] == "--raw":
-        print(raw_config(root, sys.argv[3]))
-    else:
-        tools = get_tools(root)
+    args = sys.argv[2:]
+
+    if len(args) == 2 and args[0] == "--raw":
+        print(raw_config(root, args[1]))
+        sys.exit()
+
+    tools = get_tools(root)
+    if args == ["--config"]:
         for tool in tools:
             print(f"--- Tool {tool['tool_id']}: {tool['type']}")
             print(json.dumps(tool["config"], indent=2))
         print(f"{len(tools)} tools found")
+        sys.exit()
+
+    names = {t["tool_id"]: t["type"] for t in tools}
+    print("TOOLS")
+    for t in tools:
+        print(f"  {t['tool_id']:>3}  {t['type']}")
+    connections = get_connections(root)
+    print("CONNECTIONS")
+    for c in connections:
+        hidden = "  (wireless)" if c["wireless"] else ""
+        print(f"  {c['from_tool']:>3} {names.get(c['from_tool'], '?')} [{c['from_anchor']}]"
+              f"  ->  {c['to_tool']} {names.get(c['to_tool'], '?')} [{c['to_anchor']}]{hidden}")
+    print(f"{len(tools)} tools, {len(connections)} connections")
