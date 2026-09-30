@@ -1,0 +1,205 @@
+# Scoring rules: how hard each Alteryx tool is to rebuild in Amazon Redshift SQL.
+#
+# Every rule is visible and editable here. To change how the analyzer scores,
+# change this file, not the code.
+#
+# difficulty: none | low | medium | high
+# points:     what the tool adds to the workflow's total
+#   none   = 0   (interface or display only; nothing to migrate)
+#   low    = 1   (direct SQL equivalent; a syntax swap)
+#   medium = 2-3 (equivalent exists, but behavior or types need care)
+#   high   = 6-8 (no SQL equivalent; needs redesign or another tool)
+#
+# Tool names are Alteryx's internal names (the end of the plugin name).
+# Names marked "unverified" have not yet been seen in a real parsed file;
+# confirm them the first time they appear in a client workflow.
+
+tools:
+  # ---------- In / Out ----------
+  DbFileInput:
+    name: Input Data
+    difficulty: low
+    points: 1
+    redshift: Table loaded via COPY from S3 (or an existing table)
+    note: File inputs need a loading step; CSVs carry no data types.
+  DbFileOutput:
+    name: Output Data
+    difficulty: low
+    points: 1
+    redshift: CREATE TABLE AS, INSERT INTO, or UNLOAD to S3
+  TextInput:            # unverified
+    name: Text Input
+    difficulty: low
+    points: 1
+    redshift: VALUES list or a small reference table
+
+  # ---------- Preparation ----------
+  Filter:
+    name: Filter
+    difficulty: low
+    points: 1
+    redshift: WHERE clause
+    note: Redshift string comparison is case-sensitive.
+  AlteryxSelect:
+    name: Select
+    difficulty: low
+    points: 1
+    redshift: Column list with aliases and CAST
+  Formula:
+    name: Formula
+    difficulty: medium
+    points: 2
+    redshift: Calculated columns (CASE, DATEDIFF, CAST, ...)
+    note: Functions often differ in name, argument order, or null handling.
+  MultiRowFormula:
+    name: Multi-Row Formula
+    difficulty: medium
+    points: 3
+    redshift: Window functions (LAG, LEAD, SUM OVER with a frame clause)
+    note: Row-to-row logic depends on grouping and sort order.
+  Sort:
+    name: Sort
+    difficulty: low
+    points: 1
+    redshift: ORDER BY
+  Unique:
+    name: Unique
+    difficulty: medium
+    points: 2
+    redshift: ROW_NUMBER() OVER (PARTITION BY ...) = 1
+    note: Keeps the first row per key; plain DISTINCT is not equivalent.
+  Sample:               # unverified
+    name: Sample
+    difficulty: low
+    points: 1
+    redshift: LIMIT, or ROW_NUMBER() for per-group samples
+  RecordID:             # unverified
+    name: Record ID
+    difficulty: low
+    points: 1
+    redshift: ROW_NUMBER() OVER (ORDER BY ...)
+  DateTime:             # unverified
+    name: DateTime
+    difficulty: medium
+    points: 2
+    redshift: TO_DATE / TO_CHAR
+    note: Format strings differ between Alteryx and Redshift.
+
+  # ---------- Join ----------
+  Join:
+    name: Join
+    difficulty: low
+    points: 1
+    redshift: INNER / LEFT JOIN
+    note: Unmatched outputs (L, R) need separate queries; see modifiers.
+  Union:
+    name: Union
+    difficulty: medium
+    points: 2
+    redshift: UNION ALL
+    note: SQL matches columns by position, not name.
+  AppendFields:         # unverified
+    name: Append Fields
+    difficulty: low
+    points: 1
+    redshift: CROSS JOIN
+
+  # ---------- Transform ----------
+  Summarize:
+    name: Summarize
+    difficulty: low
+    points: 1
+    redshift: GROUP BY with aggregates
+    note: Redshift AVG on integers returns an integer (truncates).
+  CrossTab:             # unverified
+    name: Cross Tab
+    difficulty: medium
+    points: 3
+    redshift: Conditional aggregation (SUM(CASE ...)) or PIVOT
+    note: Output columns depend on the data; SQL needs them listed.
+  Transpose:            # unverified
+    name: Transpose
+    difficulty: medium
+    points: 3
+    redshift: UNPIVOT or UNION ALL per column
+
+  # ---------- Parse ----------
+  RegEx:
+    name: RegEx
+    difficulty: medium
+    points: 3
+    redshift: REGEXP_SUBSTR / REGEXP_REPLACE
+    note: Regex dialects and case-sensitivity settings differ.
+  TextToColumns:        # unverified
+    name: Text To Columns
+    difficulty: medium
+    points: 2
+    redshift: SPLIT_PART
+
+  # ---------- Code and macros ----------
+  JupyterCode:
+    name: Python
+    difficulty: high
+    points: 8
+    redshift: No equivalent; rewrite in SQL or run outside Redshift
+    note: Redshift Python UDFs are no longer supported (after June 30, 2026).
+  Macro:
+    name: Macro
+    difficulty: high
+    points: 6
+    redshift: Depends on the macro's contents
+    note: Logic lives in a separate file that must be analyzed on its own.
+  RunCommand:           # unverified
+    name: Run Command
+    difficulty: high
+    points: 8
+    redshift: No equivalent; runs external programs
+
+  # ---------- Nothing to migrate ----------
+  BrowseV2:             # unverified
+    name: Browse
+    difficulty: none
+    points: 0
+  ToolContainer:        # unverified
+    name: Container
+    difficulty: none
+    points: 0
+  TextBox:
+    name: Comment
+    difficulty: none
+    points: 0
+
+# Tools the parser marks as interface tools (macro plumbing) always score 0.
+interface_points: 0
+
+# Any tool type not listed above.
+unknown_tool:
+  difficulty: medium
+  points: 3
+  note: Not in the rules yet; review by hand and add a rule.
+
+# Workflow structure that adds work beyond the individual tools.
+modifiers:
+  extra_output:
+    points: 1
+    note: Each output beyond the first needs its own query or table.
+  unmatched_join_output:
+    points: 2
+    note: A Join's unmatched records (L or R) are used downstream.
+  wireless_connection:
+    points: 1
+    note: A hidden connection makes the flow harder to follow.
+
+# Converting total points to a 1-10 difficulty score.
+# A workflow gets the highest score whose minimum it reaches.
+score_bands:
+  1: 0
+  2: 4
+  3: 5
+  4: 7
+  5: 10
+  6: 13
+  7: 18
+  8: 25
+  9: 34
+  10: 47

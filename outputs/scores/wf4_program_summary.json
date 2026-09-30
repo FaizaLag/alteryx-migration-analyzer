@@ -1,0 +1,80 @@
+{
+  "file_name": "wf4_program_summary.yxmc",
+  "file_kind": "macro",
+  "score": 1,
+  "total_points": 2,
+  "difficulty_counts": {
+    "high": 0,
+    "medium": 0,
+    "low": 2,
+    "none": 5
+  },
+  "unknown_tools": [],
+  "top_drivers": [
+    "Filter (low, 1 pts)",
+    "Summarize (low, 1 pts)"
+  ],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "Tab",
+      "name": "Tab",
+      "difficulty": "none",
+      "points": 0,
+      "interface": true
+    },
+    {
+      "tool_id": "3",
+      "type": "Filter",
+      "name": "Filter",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "WHERE clause",
+      "note": "Redshift string comparison is case-sensitive.",
+      "known": true
+    },
+    {
+      "tool_id": "6",
+      "type": "Summarize",
+      "name": "Summarize",
+      "difficulty": "low",
+      "points": 1,
+      "redshift": "GROUP BY with aggregates",
+      "note": "Redshift AVG on integers returns an integer (truncates).",
+      "known": true
+    },
+    {
+      "tool_id": "2",
+      "type": "MacroInput",
+      "name": "MacroInput",
+      "difficulty": "none",
+      "points": 0,
+      "interface": true
+    },
+    {
+      "tool_id": "4",
+      "type": "ControlParam",
+      "name": "ControlParam",
+      "difficulty": "none",
+      "points": 0,
+      "interface": true
+    },
+    {
+      "tool_id": "5",
+      "type": "Action",
+      "name": "Action",
+      "difficulty": "none",
+      "points": 0,
+      "interface": true
+    },
+    {
+      "tool_id": "7",
+      "type": "MacroOutput",
+      "name": "MacroOutput",
+      "difficulty": "none",
+      "points": 0,
+      "interface": true
+    }
+  ],
+  "modifiers": []
+}
