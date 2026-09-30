@@ -1,0 +1,102 @@
+{
+  "file_name": "wf1_active_members.yxmd",
+  "file_kind": "workflow",
+  "alteryx_version": "2025.2",
+  "tool_count": 4,
+  "interface_tool_count": 0,
+  "macros_used": [],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 150.0,
+        "y": 102.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\members.csv"
+      }
+    },
+    {
+      "tool_id": "2",
+      "type": "Filter",
+      "plugin": "AlteryxBasePluginsGui.Filter.Filter",
+      "macro": null,
+      "position": {
+        "x": 294.0,
+        "y": 102.0
+      },
+      "config": {
+        "mode": "Simple",
+        "expression": null,
+        "simple": {
+          "field": "status",
+          "operator": "=",
+          "value": "Active"
+        }
+      }
+    },
+    {
+      "tool_id": "3",
+      "type": "AlteryxSelect",
+      "plugin": "AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect",
+      "macro": null,
+      "position": {
+        "x": 450.0,
+        "y": 102.0
+      },
+      "config": {
+        "deselected": [
+          "status",
+          "term_date"
+        ],
+        "renamed": {
+          "plan_type": "plan"
+        },
+        "type_changes": {}
+      }
+    },
+    {
+      "tool_id": "4",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 630.0,
+        "y": 102.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf1_active_members.csv"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from_tool": "1",
+      "from_anchor": "Output",
+      "to_tool": "2",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "2",
+      "from_anchor": "True",
+      "to_tool": "3",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "3",
+      "from_anchor": "Output",
+      "to_tool": "4",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    }
+  ],
+  "comments": []
+}

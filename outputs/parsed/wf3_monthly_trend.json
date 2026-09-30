@@ -1,0 +1,263 @@
+{
+  "file_name": "wf3_monthly_trend.yxmd",
+  "file_kind": "workflow",
+  "alteryx_version": "2025.2",
+  "tool_count": 10,
+  "interface_tool_count": 0,
+  "macros_used": [],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 54.0,
+        "y": 54.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\cases_2026_07.csv"
+      }
+    },
+    {
+      "tool_id": "2",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 54.0,
+        "y": 150.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\cases_2026_08.csv"
+      }
+    },
+    {
+      "tool_id": "3",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 54.0,
+        "y": 258.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\cases_2026_09.csv"
+      }
+    },
+    {
+      "tool_id": "4",
+      "type": "AlteryxSelect",
+      "plugin": "AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect",
+      "macro": null,
+      "position": {
+        "x": 174.0,
+        "y": 258.0
+      },
+      "config": {
+        "deselected": [],
+        "renamed": {
+          "program_name": "program"
+        },
+        "type_changes": {}
+      }
+    },
+    {
+      "tool_id": "5",
+      "type": "Union",
+      "plugin": "AlteryxBasePluginsGui.Union.Union",
+      "macro": null,
+      "position": {
+        "x": 342.0,
+        "y": 126.0
+      },
+      "config": {
+        "mode": "ByName"
+      }
+    },
+    {
+      "tool_id": "6",
+      "type": "Formula",
+      "plugin": "AlteryxBasePluginsGui.Formula.Formula",
+      "macro": null,
+      "position": {
+        "x": 486.0,
+        "y": 126.0
+      },
+      "config": {
+        "formulas": [
+          {
+            "field": "open_dt",
+            "type": "Date",
+            "expression": "IIF(Contains([open_date], \"/\"),\nDateTimeParse([open_date],\"%m/%d/%Y\"),\nIIF(Length([open_date]) = 11, \nDateTimeParse([open_date],\"%d-%b-%Y\"),\nDateTimeParse([open_date],\"%Y/%m/%d\")))"
+          },
+          {
+            "field": "status",
+            "type": "V_String",
+            "expression": "TitleCase([status])"
+          },
+          {
+            "field": "member_id",
+            "type": "V_String",
+            "expression": "IIF(IsEmpty([member_id]), \"UNKNOWN\", [member_id])"
+          },
+          {
+            "field": "case_month",
+            "type": "V_String",
+            "expression": "DateTimeFormat([open_dt],\"%Y-%m\")"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "7",
+      "type": "Unique",
+      "plugin": "AlteryxBasePluginsGui.Unique.Unique",
+      "macro": null,
+      "position": {
+        "x": 630.0,
+        "y": 126.0
+      },
+      "config": {
+        "unique_on": [
+          "case_id"
+        ]
+      }
+    },
+    {
+      "tool_id": "9",
+      "type": "Summarize",
+      "plugin": "AlteryxSpatialPluginsGui.Summarize.Summarize",
+      "macro": null,
+      "position": {
+        "x": 774.0,
+        "y": 126.0
+      },
+      "config": {
+        "actions": [
+          {
+            "field": "case_month",
+            "action": "GroupBy",
+            "rename": "case_month"
+          },
+          {
+            "field": "program",
+            "action": "GroupBy",
+            "rename": "program"
+          },
+          {
+            "field": "case_id",
+            "action": "Count",
+            "rename": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "10",
+      "type": "Sort",
+      "plugin": "AlteryxBasePluginsGui.Sort.Sort",
+      "macro": null,
+      "position": {
+        "x": 894.0,
+        "y": 126.0
+      },
+      "config": {
+        "sort_by": [
+          {
+            "field": "case_month",
+            "order": "Ascending"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "11",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 1038.0,
+        "y": 126.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf3_monthly_trend.csv"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from_tool": "1",
+      "from_anchor": "Output",
+      "to_tool": "5",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": "#1"
+    },
+    {
+      "from_tool": "2",
+      "from_anchor": "Output",
+      "to_tool": "5",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": "#2"
+    },
+    {
+      "from_tool": "4",
+      "from_anchor": "Output",
+      "to_tool": "5",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": "#3"
+    },
+    {
+      "from_tool": "3",
+      "from_anchor": "Output",
+      "to_tool": "4",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "5",
+      "from_anchor": "Output",
+      "to_tool": "6",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "6",
+      "from_anchor": "Output",
+      "to_tool": "7",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "7",
+      "from_anchor": "Unique",
+      "to_tool": "9",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "9",
+      "from_anchor": "Output",
+      "to_tool": "10",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "10",
+      "from_anchor": "Output",
+      "to_tool": "11",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    }
+  ],
+  "comments": []
+}

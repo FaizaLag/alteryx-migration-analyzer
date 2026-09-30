@@ -1,0 +1,175 @@
+{
+  "file_name": "wf2_cases_by_member.yxmd",
+  "file_kind": "workflow",
+  "alteryx_version": "2025.2",
+  "tool_count": 6,
+  "interface_tool_count": 0,
+  "macros_used": [],
+  "tools": [
+    {
+      "tool_id": "1",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 66.0,
+        "y": 90.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\members.csv"
+      }
+    },
+    {
+      "tool_id": "2",
+      "type": "DbFileInput",
+      "plugin": "AlteryxBasePluginsGui.DbFileInput.DbFileInput",
+      "macro": null,
+      "position": {
+        "x": 66.0,
+        "y": 198.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\data\\cases.csv"
+      }
+    },
+    {
+      "tool_id": "3",
+      "type": "Join",
+      "plugin": "AlteryxBasePluginsGui.Join.Join",
+      "macro": null,
+      "position": {
+        "x": 246.0,
+        "y": 150.0
+      },
+      "config": {
+        "join_keys": {
+          "left": [
+            "member_id"
+          ],
+          "right": [
+            "member_id"
+          ]
+        }
+      }
+    },
+    {
+      "tool_id": "4",
+      "type": "Formula",
+      "plugin": "AlteryxBasePluginsGui.Formula.Formula",
+      "macro": null,
+      "position": {
+        "x": 402.0,
+        "y": 150.0
+      },
+      "config": {
+        "formulas": [
+          {
+            "field": "days_open",
+            "type": "Int32",
+            "expression": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))"
+          },
+          {
+            "field": "age_band",
+            "type": "V_String",
+            "expression": "IIF(2026- ToNumber([birth_year]) >= 65, \"Senior\", \"Adult\")"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "5",
+      "type": "Summarize",
+      "plugin": "AlteryxSpatialPluginsGui.Summarize.Summarize",
+      "macro": null,
+      "position": {
+        "x": 606.0,
+        "y": 150.0
+      },
+      "config": {
+        "actions": [
+          {
+            "field": "member_id",
+            "action": "GroupBy",
+            "rename": "member_id"
+          },
+          {
+            "field": "program",
+            "action": "GroupBy",
+            "rename": "program"
+          },
+          {
+            "field": "age_band",
+            "action": "GroupBy",
+            "rename": "age_band"
+          },
+          {
+            "field": "case_id",
+            "action": "Count",
+            "rename": "Count"
+          },
+          {
+            "field": "days_open",
+            "action": "Avg",
+            "rename": "Avg_days_open"
+          }
+        ]
+      }
+    },
+    {
+      "tool_id": "6",
+      "type": "DbFileOutput",
+      "plugin": "AlteryxBasePluginsGui.DbFileOutput.DbFileOutput",
+      "macro": null,
+      "position": {
+        "x": 786.0,
+        "y": 150.0
+      },
+      "config": {
+        "file": "C:\\Users\\faiza\\Projects\\alteryx-migration-analyzer\\tests\\expected_outputs\\wf2_cases_by_member.csv"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from_tool": "1",
+      "from_anchor": "Output",
+      "to_tool": "3",
+      "to_anchor": "Left",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "2",
+      "from_anchor": "Output",
+      "to_tool": "3",
+      "to_anchor": "Right",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "3",
+      "from_anchor": "Join",
+      "to_tool": "4",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "4",
+      "from_anchor": "Output",
+      "to_tool": "5",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    },
+    {
+      "from_tool": "5",
+      "from_anchor": "Output",
+      "to_tool": "6",
+      "to_anchor": "Input",
+      "wireless": false,
+      "name": null
+    }
+  ],
+  "comments": []
+}

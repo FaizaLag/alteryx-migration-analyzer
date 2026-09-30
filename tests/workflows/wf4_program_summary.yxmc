@@ -131,7 +131,7 @@
           <FileInput>
             <Configuration>
               <Passwords />
-              <File OutputFileName="" FileFormat="19" SearchSubDirs="False" RecordLimit="">C:\Users\user\Documents\Training\test_data\wf4_claim_savings.yxdb</File>
+              <File OutputFileName="" FileFormat="19" SearchSubDirs="False" RecordLimit="">C:\Users\faiza\Projects\alteryx-migration-analyzer\tests\expected_outputs\wf4_claim_savings.yxdb</File>
               <FormatSpecificOptions />
             </Configuration>
           </FileInput>
