@@ -5,7 +5,7 @@ Colors show migration difficulty: red = high, yellow = medium, green = low, grey
 ```mermaid
 flowchart LR
     t3["Filter<br/>program = Care Navigation"]
-    t6["Summarize<br/>by program"]
+    t6["Summarize<br/>by program; Sum savings; Count claim_id"]
     t2["Macro Input"]
     t4["Control Parameter"]
     t5["Action"]

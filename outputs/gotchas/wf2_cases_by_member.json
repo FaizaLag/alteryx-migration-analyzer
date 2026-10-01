@@ -2,7 +2,7 @@
   "file_name": "wf2_cases_by_member.yxmd",
   "counts": {
     "high": 1,
-    "medium": 4,
+    "medium": 5,
     "low": 4
   },
   "findings": [
@@ -32,6 +32,15 @@
       "evidence": "IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],\"days\"),DateTimeDiff([close_date],[open_date],\"days\"))",
       "message": "Uses today's date, so results change every day.",
       "redshift": "CURRENT_DATE or GETDATE(). Pin a fixed date when comparing old and new outputs."
+    },
+    {
+      "check": "hardcoded_year",
+      "severity": "medium",
+      "tool_id": "4",
+      "where": "Formula (tool 4), field age_band",
+      "evidence": "IIF(2026- ToNumber([birth_year]) >= 65, \"Senior\", \"Adult\")",
+      "message": "A year is typed directly into the formula, so results go stale as time passes.",
+      "redshift": "Derive it from the data or the current date (e.g. EXTRACT(YEAR FROM CURRENT_DATE)), or make it a parameter."
     },
     {
       "check": "is_empty",

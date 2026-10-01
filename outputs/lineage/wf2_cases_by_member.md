@@ -8,7 +8,7 @@ flowchart LR
     t2[("Input Data<br/>cases.csv")]
     t3["Join<br/>on member_id"]
     t4["Formula<br/>new: days_open, age_band"]
-    t5["Summarize<br/>by member_id, program, age_band"]
+    t5["Summarize<br/>by member_id, program, age_band; Count …"]
     t6[("Output Data<br/>wf2_cases_by_member.csv")]
     t1 -->|left| t3
     t2 -->|right| t3

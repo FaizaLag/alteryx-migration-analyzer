@@ -11,7 +11,7 @@ flowchart LR
     t5["Union<br/>mode: ByName"]
     t6["Formula<br/>new: open_dt, status, member_id, case_m…"]
     t7["Unique<br/>on case_id"]
-    t9["Summarize<br/>by case_month, program"]
+    t9["Summarize<br/>by case_month, program; Count case_id"]
     t10["Sort<br/>by case_month"]
     t11[("Output Data<br/>wf3_monthly_trend.csv")]
     t1 --> t5
