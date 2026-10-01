@@ -4,7 +4,7 @@
 
 ## In short
 
-This workflow (a macro, which is a reusable Alteryx sub-process) filters records to the 'Care Navigation' program, then summarizes the data by summing savings and counting claim IDs. It scores 1 out of 10, meaning it translates directly to SQL with minimal rework. Both tools used - the Filter [3] and Summarize [6] - are simple, well-understood operations with clean SQL equivalents.
+This workflow filters records to a single program (Care Navigation) and then summarizes the result by summing savings and counting claims. It scores 1 out of 10, meaning it is a direct translation to SQL. Both tools used have simple, well-known SQL equivalents, so there are no design decisions or rework needed.
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -35,10 +35,10 @@ flowchart LR
 
 ## Next steps
 
-1. Confirm the business logic for tools [2], [4], and [5] since their function isn't detailed in these facts.
-2. Translate the Filter [3] to a SQL WHERE clause filtering on program = 'Care Navigation'.
-3. Translate the Summarize [6] to a SQL GROUP BY on program, with SUM(savings) and COUNT(claim_id).
-4. Verify what tool [7] does with the summarized output, as it is outside the scope of these facts.
+1. Translate the Filter [3] into a WHERE clause for program = 'Care Navigation'.
+2. Translate the Summarize [6] into a GROUP BY query with SUM(savings) and COUNT(claim_id).
+3. Confirm the exact field names and data types for program, savings, and claim_id before writing the SQL.
+4. Validate the Redshift output against the original workflow output for the Care Navigation program to confirm matching totals.
 
 ## Every gotcha found
 
