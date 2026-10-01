@@ -110,6 +110,11 @@ formula_checks:
     message: Refers to values in other rows (e.g. a running total).
     redshift: Window functions (LAG, LEAD, or SUM(...) OVER (PARTITION BY ... ORDER BY ... ROWS UNBOUNDED PRECEDING)). Redshift requires the frame clause when the window has ORDER BY.
 
+  hardcoded_year:
+    pattern: '\b(19|20)\d{2}\b'
+    severity: medium
+    message: A year is typed directly into the formula, so results go stale as time passes.
+    redshift: Derive it from the data or the current date (e.g. EXTRACT(YEAR FROM CURRENT_DATE)), or make it a parameter.
 # ---------- Checks on tool settings and structure ----------
 # Detected in code (src/gotchas.py); the wording lives here so it's easy to edit.
 
