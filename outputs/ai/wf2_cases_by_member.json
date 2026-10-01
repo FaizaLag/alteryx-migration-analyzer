@@ -1,0 +1,90 @@
+{
+  "summary": "This workflow joins a members file and a cases file on member ID, calculates how long each case has been open and an age band for each member, then summarizes case counts and average days open by member, program, and age band. It scores 4 out of 10, meaning it needs a few targeted rewrites rather than a full redesign. The main driver is the Formula tool [4], which contains several date and number-handling patterns that behave differently in Redshift.",
+  "key_components": [
+    {
+      "tools": [
+        "1",
+        "2",
+        "3"
+      ],
+      "description": "Loads members and cases data from CSV files and joins them on member_id."
+    },
+    {
+      "tools": [
+        "4"
+      ],
+      "description": "Calculates days_open (handling open vs. closed cases) and assigns an age_band based on birth year."
+    },
+    {
+      "tools": [
+        "5"
+      ],
+      "description": "Groups results by member_id, program, and age_band, counting cases and averaging days_open."
+    },
+    {
+      "tools": [
+        "6"
+      ],
+      "description": "Writes the final summarized results to an output file."
+    }
+  ],
+  "risks": [
+    {
+      "title": "Average of an integer field loses precision",
+      "severity": "high",
+      "tools": [
+        "5"
+      ],
+      "detail": "days_open is a whole number, and Redshift's AVG on integers returns an integer, silently dropping decimal places. The field must be cast to DECIMAL or FLOAT before averaging."
+    },
+    {
+      "title": "Date logic will behave differently without changes",
+      "severity": "medium",
+      "tools": [
+        "4"
+      ],
+      "detail": "The formula uses DateTimeDiff with arguments in the opposite order to Redshift's DATEDIFF, uses today's date (DateTimeToday) so results change daily, and uses IsEmpty, which treats NULL and empty text the same way SQL does not. Each of these needs a specific rewrite and could produce wrong or non-reproducible numbers if missed."
+    },
+    {
+      "title": "Hardcoded year and risky text-to-number conversion",
+      "severity": "medium",
+      "tools": [
+        "4"
+      ],
+      "detail": "The age_band calculation uses a fixed year (2026) typed into the formula, so it will go stale over time, and converts birth_year text to a number with ToNumber; in Redshift an invalid value here would fail the whole query instead of behaving leniently."
+    },
+    {
+      "title": "IIF function has no direct Redshift equivalent",
+      "severity": "low",
+      "tools": [
+        "4"
+      ],
+      "detail": "Both IIF expressions in the Formula tool [4] need to be rewritten as CASE WHEN statements; this is mechanical but must be done carefully to preserve logic."
+    },
+    {
+      "title": "CSV inputs have no defined data types",
+      "severity": "low",
+      "tools": [
+        "1",
+        "2"
+      ],
+      "detail": "CSV files carry no type information, so column types (e.g., for birth_year, dates) must be explicitly defined when loading into Redshift via COPY."
+    }
+  ],
+  "next_steps": [
+    "Cast days_open to DECIMAL or FLOAT before applying AVG in the Summarize step [5].",
+    "Rewrite the DateTimeDiff logic in Formula [4] as DATEDIFF(unit, start, end), checking the sign of the result.",
+    "Replace DateTimeToday() in Formula [4] with CURRENT_DATE or GETDATE(), and decide whether to pin a fixed date for testing against old outputs.",
+    "Replace the hardcoded year (2026) in Formula [4] with a dynamic value, such as EXTRACT(YEAR FROM CURRENT_DATE), or a parameter.",
+    "Rewrite both IIF expressions in Formula [4] as CASE WHEN statements.",
+    "Define explicit column types when loading members.csv and cases.csv [1, 2] into Redshift, and test the IsEmpty/close_date logic for NULL vs. empty string handling."
+  ],
+  "_check": {
+    "model": "claude-sonnet-5",
+    "usage": {
+      "input_tokens": 2976,
+      "output_tokens": 1850
+    },
+    "uncited_or_invented_tool_ids": []
+  }
+}

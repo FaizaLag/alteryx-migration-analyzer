@@ -67,7 +67,9 @@ def tool_detail(tool):
         return "on " + ", ".join(cfg.get("join_keys", {}).get("left", []))
     if t == "Summarize":
         groups = [a["field"] for a in cfg.get("actions", []) if a.get("action") == "GroupBy"]
-        return "by " + ", ".join(groups) if groups else "totals"
+        aggs = [f"{a['action']} {a['field']}" for a in cfg.get("actions", []) if a.get("action") != "GroupBy"]
+        parts = (["by " + ", ".join(groups)] if groups else []) + aggs
+        return "; ".join(parts) or "totals"
     if t == "Sort":
         return "by " + ", ".join(s["field"] for s in cfg.get("sort_by", []))
     if t == "Unique":

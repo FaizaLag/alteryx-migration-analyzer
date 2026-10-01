@@ -1,0 +1,49 @@
+{
+  "summary": "This macro filters claims data to the 'Care Navigation' program and then summarizes savings and claim counts by program. It scores 1 out of 10, the lowest difficulty band, because both tools used are simple, direct-translation operations. There are no gotchas or structural complications noted in the facts.",
+  "key_components": [
+    {
+      "tools": [
+        "3"
+      ],
+      "description": "Filter [3] keeps only rows where program equals 'Care Navigation'."
+    },
+    {
+      "tools": [
+        "6"
+      ],
+      "description": "Summarize [6] groups the filtered data by program, summing savings and counting claim_id."
+    }
+  ],
+  "risks": [
+    {
+      "title": "Unlabeled upstream/downstream tools",
+      "severity": "low",
+      "tools": [
+        "2",
+        "4",
+        "5",
+        "7"
+      ],
+      "detail": "The data flow shows tools 2, 4, 5, and 7 feeding into or out of the filter and summarize steps, but the facts don't describe what these tools do. This can't be assessed from the workflow file as given."
+    }
+  ],
+  "next_steps": [
+    "Confirm what tools 2, 4, 5, and 7 do, since they are not detailed in the extracted facts but are part of the data flow.",
+    "Translate Filter [3] into a WHERE clause for program = 'Care Navigation'.",
+    "Translate Summarize [6] into a GROUP BY program with SUM(savings) and COUNT(claim_id).",
+    "Validate the Redshift output against the original macro's output for a sample of records."
+  ],
+  "_check": {
+    "model": "claude-sonnet-5",
+    "usage": {
+      "input_tokens": 1063,
+      "output_tokens": 1032
+    },
+    "uncited_or_invented_tool_ids": [
+      "2",
+      "4",
+      "5",
+      "7"
+    ]
+  }
+}
