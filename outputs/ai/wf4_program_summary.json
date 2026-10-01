@@ -1,46 +1,42 @@
 {
-  "summary": "This workflow (a macro, which is a reusable Alteryx sub-process) filters records to the 'Care Navigation' program, then summarizes the data by summing savings and counting claim IDs. It scores 1 out of 10, meaning it translates directly to SQL with minimal rework. Both tools used - the Filter [3] and Summarize [6] - are simple, well-understood operations with clean SQL equivalents.",
+  "summary": "This macro filters claims data to the 'Care Navigation' program and then summarizes the results by program, summing savings and counting claim IDs. It scored 1 out of 10, meaning it translates to Redshift SQL almost directly with no significant rework needed. The only two scored tools, Filter [3] and Summarize [6], both map cleanly to standard SQL (WHERE clause and GROUP BY with aggregates).",
   "key_components": [
     {
       "tools": [
-        2,
-        3,
-        4,
-        5
+        3
       ],
-      "description": "Data flows through several steps into the Filter [3], which keeps only records where program equals 'Care Navigation'."
+      "description": "Filters the dataset down to rows where program equals 'Care Navigation'."
     },
     {
       "tools": [
         6
       ],
-      "description": "The Summarize tool [6] groups the filtered data by program, summing savings and counting claim IDs."
-    },
-    {
-      "tools": [
-        7
-      ],
-      "description": "The summarized result is passed downstream to tool [7]."
+      "description": "Groups the filtered data by program, summing the savings field and counting claim_id."
     }
   ],
-  "risks": [],
+  "risks": [
+    {
+      "title": "No significant risks identified",
+      "severity": "low",
+      "tools": [
+        3,
+        6
+      ],
+      "detail": "The facts show no gotchas and only low-difficulty tools, so there is nothing flagged that would complicate migration."
+    }
+  ],
   "next_steps": [
-    "Confirm the business logic for tools [2], [4], and [5] since their function isn't detailed in these facts.",
-    "Translate the Filter [3] to a SQL WHERE clause filtering on program = 'Care Navigation'.",
-    "Translate the Summarize [6] to a SQL GROUP BY on program, with SUM(savings) and COUNT(claim_id).",
-    "Verify what tool [7] does with the summarized output, as it is outside the scope of these facts."
+    "Translate the Filter [3] condition into a SQL WHERE clause.",
+    "Translate the Summarize [6] step into a GROUP BY query with SUM(savings) and COUNT(claim_id).",
+    "Confirm what tools 2, 4, 5, and 7 do, since the facts only describe their position in the data flow, not their function.",
+    "Validate the Redshift query output against the original macro's results using a sample dataset."
   ],
   "_check": {
     "model": "claude-sonnet-5",
     "usage": {
       "input_tokens": 1063,
-      "output_tokens": 488
+      "output_tokens": 1184
     },
-    "uncited_or_invented_tool_ids": [
-      "2",
-      "4",
-      "5",
-      "7"
-    ]
+    "uncited_or_invented_tool_ids": []
   }
 }

@@ -4,7 +4,7 @@
 
 ## In short
 
-This workflow (a macro, which is a reusable Alteryx sub-process) filters records to the 'Care Navigation' program, then summarizes the data by summing savings and counting claim IDs. It scores 1 out of 10, meaning it translates directly to SQL with minimal rework. Both tools used - the Filter [3] and Summarize [6] - are simple, well-understood operations with clean SQL equivalents.
+This macro filters claims data to the 'Care Navigation' program and then summarizes the results by program, summing savings and counting claim IDs. It scored 1 out of 10, meaning it translates to Redshift SQL almost directly with no significant rework needed. The only two scored tools, Filter [3] and Summarize [6], both map cleanly to standard SQL (WHERE clause and GROUP BY with aggregates).
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -33,12 +33,15 @@ flowchart LR
 
 ## Main risks
 
+**No significant risks identified** (low)  
+The facts show no gotchas and only low-difficulty tools, so there is nothing flagged that would complicate migration.
+
 ## Next steps
 
-1. Confirm the business logic for tools [2], [4], and [5] since their function isn't detailed in these facts.
-2. Translate the Filter [3] to a SQL WHERE clause filtering on program = 'Care Navigation'.
-3. Translate the Summarize [6] to a SQL GROUP BY on program, with SUM(savings) and COUNT(claim_id).
-4. Verify what tool [7] does with the summarized output, as it is outside the scope of these facts.
+1. Translate the Filter [3] condition into a SQL WHERE clause.
+2. Translate the Summarize [6] step into a GROUP BY query with SUM(savings) and COUNT(claim_id).
+3. Confirm what tools 2, 4, 5, and 7 do, since the facts only describe their position in the data flow, not their function.
+4. Validate the Redshift query output against the original macro's results using a sample dataset.
 
 ## Every gotcha found
 
