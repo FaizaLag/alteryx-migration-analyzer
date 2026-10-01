@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wf4_program_summary.yxmc: Redshift migration assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44; --muted: #5b6577; --line: #d9dee7; --wash: #f3f5f8; --paper: #ffffff;
+    --high: #b02a37; --high-bg: #f8d7da; --med: #8a6508; --med-bg: #fff3cd;
+    --low: #2e7d4f; --low-bg: #d1e7dd; --none-bg: #e9ecef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wash); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; background: var(--paper); }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 4px; font-weight: 600; word-break: break-word; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; font-weight: 600; }
+  h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  .sub { color: var(--muted); margin-bottom: 32px; }
+  a { color: var(--ink); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid #4c7bd9; outline-offset: 2px; }
+
+  /* The score scale: the one bold element */
+  .scale { margin: 8px 0 8px; }
+  .scale-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .scale-num { font-size: 3.2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scale-num span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .scale-band { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .seg { height: 14px; background: var(--wash); border: 1px solid var(--line); }
+  .seg.on.low { background: var(--low); border-color: var(--low); }
+  .seg.on.medium { background: #c99a1a; border-color: #c99a1a; }
+  .seg.on.high { background: var(--high); border-color: var(--high); }
+  .ticks { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted);
+           font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .facts { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+
+  .summary { font-size: 1.08rem; border-left: 3px solid var(--ink); padding-left: 16px; }
+  .ai-note { color: var(--muted); font-size: .85rem; }
+
+  .ref { display: inline-block; font-size: .78em; font-weight: 600; padding: 0 5px; margin: 0 1px;
+         border: 1px solid var(--line); border-radius: 3px; background: var(--wash); white-space: nowrap; }
+
+  .diagram { overflow-x: auto; border: 1px solid var(--line); padding: 16px; }
+  .diagram pre.mermaid { margin: 0; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #999; }
+
+  .risk { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .risk.high { border-color: var(--high); } .risk.medium { border-color: #c99a1a; } .risk.low { border-color: var(--low); }
+  .sev { font-size: .78rem; font-weight: 600; padding: 1px 7px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .sev.high { background: var(--high-bg); color: var(--high); }
+  .sev.medium { background: var(--med-bg); color: var(--med); }
+  .sev.low { background: var(--low-bg); color: var(--low); }
+  .sev.none { background: var(--none-bg); color: var(--muted); }
+
+  ol.steps { padding-left: 1.4em; } ol.steps li { margin-bottom: 8px; max-width: 72ch; }
+  ul.parts { list-style: none; padding: 0; } ul.parts li { margin-bottom: 8px; }
+
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .85em; word-break: break-word; }
+
+  .callout { background: var(--wash); padding: 12px 16px; margin: 16px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+  footer p { max-width: none; }
+
+  @media (max-width: 600px) { main { padding: 24px 16px 48px; } .scale-num { font-size: 2.6rem; } }
+  @media print { body { background: none; } main { padding: 0; } details { display: block; } .diagram { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>wf4_program_summary.yxmc</h1>
+  <p class="sub">Redshift migration assessment of a macro, generated October 01, 2026</p>
+
+  <section class="scale" aria-label="Difficulty score 1 out of 10">
+    <div class="scale-head">
+      <div class="scale-num">1<span>/10</span></div>
+      <div class="scale-band">Direct translation</div>
+    </div>
+    <div class="segments">
+      <div class="seg on low"></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div>
+    </div>
+    <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+    <p class="facts">2 tools, 2 difficulty points:
+      0 high, 0 medium, 2 low.
+      0 migration gotchas found.</p>
+  </section>
+
+  
+
+  <h2>In short</h2>
+  
+    <p class="summary">This macro filters claims data to the &#39;Care Navigation&#39; program and then summarizes savings and claim counts by program. It scores 1 out of 10, the lowest difficulty band, because both tools used are simple, direct-translation operations. There are no gotchas or structural complications noted in the facts.</p>
+    <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
+  
+
+  <h2>How data flows</h2>
+  <div class="diagram"><pre class="mermaid">flowchart LR
+    t3[&#34;Filter&lt;br/&gt;program = Care Navigation&#34;]
+    t6[&#34;Summarize&lt;br/&gt;by program; Sum savings; Count claim_id&#34;]
+    t2[&#34;Macro Input&#34;]
+    t4[&#34;Control Parameter&#34;]
+    t5[&#34;Action&#34;]
+    t7[&#34;Macro Output&#34;]
+    t3 --&gt;|true| t6
+    t6 --&gt; t7
+    t2 --&gt; t3
+    t5 -.-&gt;|sets value| t3
+    t4 -.-&gt; t5
+    classDef high fill:#f8d7da,stroke:#b02a37,color:#3d0a10
+    classDef medium fill:#fff3cd,stroke:#b8860b,color:#3d2e00
+    classDef low fill:#d1e7dd,stroke:#2e7d4f,color:#0b2e1c
+    class t3,t6 low
+    classDef none fill:#e9ecef,stroke:#6c757d,color:#212529
+    class t2,t4,t5,t7 none</pre></div>
+  <div class="legend">
+    <span><i style="background:#f8d7da"></i>High difficulty</span>
+    <span><i style="background:#fff3cd"></i>Medium</span>
+    <span><i style="background:#d1e7dd"></i>Low</span>
+    <span><i style="background:#e9ecef"></i>Nothing to migrate</span>
+  </div>
+
+  
+  <h2>Main risks</h2>
+  
+    <div class="risk low">
+      <h3>Unlabeled upstream/downstream tools<span class="sev low">low</span></h3>
+      <p>The data flow shows tools 2, 4, 5, and 7 feeding into or out of the filter and summarize steps, but the facts don&#39;t describe what these tools do. This can&#39;t be assessed from the workflow file as given.</p>
+    </div>
+  
+
+  <h2>Next steps</h2>
+  <ol class="steps"><li>Confirm what tools 2, 4, 5, and 7 do, since they are not detailed in the extracted facts but are part of the data flow.</li><li>Translate Filter <span class="ref" title="Filter (tool 3)">3</span> into a WHERE clause for program = &#39;Care Navigation&#39;.</li><li>Translate Summarize <span class="ref" title="Summarize (tool 6)">6</span> into a GROUP BY program with SUM(savings) and COUNT(claim_id).</li><li>Validate the Redshift output against the original macro&#39;s output for a sample of records.</li></ol>
+
+  <h2>What the workflow does</h2>
+  <ul class="parts">
+    <li><span class="ref" title="Filter (tool 3)">3</span> Filter [3] keeps only rows where program equals &#39;Care Navigation&#39;.</li>
+    <li><span class="ref" title="Summarize (tool 6)">6</span> Summarize [6] groups the filtered data by program, summing savings and counting claim_id.</li>
+  </ul>
+  
+
+  <h2>Details</h2>
+  <details>
+    <summary>Every tool and its Redshift equivalent (2)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>What it does</th><th>Difficulty</th><th>In Redshift</th></tr>
+      
+      <tr><td>Filter <span class="ref">3</span></td><td>program = Care Navigation</td>
+          <td><span class="sev low">low</span></td><td>WHERE clause</td></tr>
+      
+      <tr><td>Summarize <span class="ref">6</span></td><td>by program; Sum savings; Count claim_id</td>
+          <td><span class="sev low">low</span></td><td>GROUP BY with aggregates</td></tr>
+      
+    </table></div>
+  </details>
+  <details>
+    <summary>Every gotcha found (0 kinds, 0 in total)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Issue</th><th>Tools</th><th>Evidence</th><th>What to do in Redshift</th></tr>
+      
+    </table></div>
+  </details>
+
+  <footer>
+    <p>How this report was made: code read the workflow file, scored each tool against editable rules (tool_rules.yaml), and checked formulas and settings for known migration issues (formula_gotchas.yaml). The AI only explains those facts. The score is the rules' output, not the AI's opinion.</p>
+    <p>Limits: the analyzer reads workflow logic, not data. Data-dependent issues, such as a date format that doesn't match the actual data, are flagged as risks to test rather than detected directly. Effort and cost aren't estimated.</p>
+  </footer>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontFamily: "IBM Plex Sans, Segoe UI, sans-serif", lineColor: "#5b6577", edgeLabelBackground: "#f3f5f8" } });
+</script>
+</body>
+</html>

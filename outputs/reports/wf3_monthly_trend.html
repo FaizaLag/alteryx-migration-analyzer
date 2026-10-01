@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wf3_monthly_trend.yxmd: Redshift migration assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44; --muted: #5b6577; --line: #d9dee7; --wash: #f3f5f8; --paper: #ffffff;
+    --high: #b02a37; --high-bg: #f8d7da; --med: #8a6508; --med-bg: #fff3cd;
+    --low: #2e7d4f; --low-bg: #d1e7dd; --none-bg: #e9ecef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wash); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; background: var(--paper); }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 4px; font-weight: 600; word-break: break-word; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; font-weight: 600; }
+  h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  .sub { color: var(--muted); margin-bottom: 32px; }
+  a { color: var(--ink); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid #4c7bd9; outline-offset: 2px; }
+
+  /* The score scale: the one bold element */
+  .scale { margin: 8px 0 8px; }
+  .scale-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .scale-num { font-size: 3.2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scale-num span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .scale-band { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .seg { height: 14px; background: var(--wash); border: 1px solid var(--line); }
+  .seg.on.low { background: var(--low); border-color: var(--low); }
+  .seg.on.medium { background: #c99a1a; border-color: #c99a1a; }
+  .seg.on.high { background: var(--high); border-color: var(--high); }
+  .ticks { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted);
+           font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .facts { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+
+  .summary { font-size: 1.08rem; border-left: 3px solid var(--ink); padding-left: 16px; }
+  .ai-note { color: var(--muted); font-size: .85rem; }
+
+  .ref { display: inline-block; font-size: .78em; font-weight: 600; padding: 0 5px; margin: 0 1px;
+         border: 1px solid var(--line); border-radius: 3px; background: var(--wash); white-space: nowrap; }
+
+  .diagram { overflow-x: auto; border: 1px solid var(--line); padding: 16px; }
+  .diagram pre.mermaid { margin: 0; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #999; }
+
+  .risk { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .risk.high { border-color: var(--high); } .risk.medium { border-color: #c99a1a; } .risk.low { border-color: var(--low); }
+  .sev { font-size: .78rem; font-weight: 600; padding: 1px 7px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .sev.high { background: var(--high-bg); color: var(--high); }
+  .sev.medium { background: var(--med-bg); color: var(--med); }
+  .sev.low { background: var(--low-bg); color: var(--low); }
+  .sev.none { background: var(--none-bg); color: var(--muted); }
+
+  ol.steps { padding-left: 1.4em; } ol.steps li { margin-bottom: 8px; max-width: 72ch; }
+  ul.parts { list-style: none; padding: 0; } ul.parts li { margin-bottom: 8px; }
+
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .85em; word-break: break-word; }
+
+  .callout { background: var(--wash); padding: 12px 16px; margin: 16px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+  footer p { max-width: none; }
+
+  @media (max-width: 600px) { main { padding: 24px 16px 48px; } .scale-num { font-size: 2.6rem; } }
+  @media print { body { background: none; } main { padding: 0; } details { display: block; } .diagram { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>wf3_monthly_trend.yxmd</h1>
+  <p class="sub">Redshift migration assessment, generated October 01, 2026</p>
+
+  <section class="scale" aria-label="Difficulty score 6 out of 10">
+    <div class="scale-head">
+      <div class="scale-num">6<span>/10</span></div>
+      <div class="scale-band">Design decisions needed</div>
+    </div>
+    <div class="segments">
+      <div class="seg on medium"></div><div class="seg on medium"></div><div class="seg on medium"></div><div class="seg on medium"></div><div class="seg on medium"></div><div class="seg on medium"></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div>
+    </div>
+    <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+    <p class="facts">10 tools, 13 difficulty points:
+      0 high, 3 medium, 7 low.
+      15 migration gotchas found.</p>
+  </section>
+
+  
+
+  <h2>In short</h2>
+  
+    <p class="summary">This workflow combines three months of case data, cleans and deduplicates it, then summarizes case counts by month and program for a trend report. It scores 6/10, meaning the migration needs real design decisions rather than a direct rewrite. The main drivers are a Union <span class="ref" title="Union (tool 5)">5</span> that matches columns by name, a Formula <span class="ref" title="Formula (tool 6)">6</span> with multiple date formats and mixed logic, and a Unique <span class="ref" title="Unique (tool 7)">7</span> step whose result depends on row order.</p>
+    <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
+  
+
+  <h2>How data flows</h2>
+  <div class="diagram"><pre class="mermaid">flowchart LR
+    t1[(&#34;Input Data&lt;br/&gt;cases_2026_07.csv&#34;)]
+    t2[(&#34;Input Data&lt;br/&gt;cases_2026_08.csv&#34;)]
+    t3[(&#34;Input Data&lt;br/&gt;cases_2026_09.csv&#34;)]
+    t4[&#34;Select&lt;br/&gt;program_name as program&#34;]
+    t5[&#34;Union&lt;br/&gt;mode: ByName&#34;]
+    t6[&#34;Formula&lt;br/&gt;new: open_dt, status, member_id, case_m…&#34;]
+    t7[&#34;Unique&lt;br/&gt;on case_id&#34;]
+    t9[&#34;Summarize&lt;br/&gt;by case_month, program; Count case_id&#34;]
+    t10[&#34;Sort&lt;br/&gt;by case_month&#34;]
+    t11[(&#34;Output Data&lt;br/&gt;wf3_monthly_trend.csv&#34;)]
+    t1 --&gt; t5
+    t2 --&gt; t5
+    t4 --&gt; t5
+    t3 --&gt; t4
+    t5 --&gt; t6
+    t6 --&gt; t7
+    t7 --&gt;|unique| t9
+    t9 --&gt; t10
+    t10 --&gt; t11
+    classDef high fill:#f8d7da,stroke:#b02a37,color:#3d0a10
+    classDef medium fill:#fff3cd,stroke:#b8860b,color:#3d2e00
+    class t5,t6,t7 medium
+    classDef low fill:#d1e7dd,stroke:#2e7d4f,color:#0b2e1c
+    class t1,t2,t3,t4,t9,t10,t11 low
+    classDef none fill:#e9ecef,stroke:#6c757d,color:#212529</pre></div>
+  <div class="legend">
+    <span><i style="background:#f8d7da"></i>High difficulty</span>
+    <span><i style="background:#fff3cd"></i>Medium</span>
+    <span><i style="background:#d1e7dd"></i>Low</span>
+    <span><i style="background:#e9ecef"></i>Nothing to migrate</span>
+  </div>
+
+  
+  <h2>Main risks</h2>
+  
+    <div class="risk high">
+      <h3>Unique keeps &#39;first&#39; row, but SQL has no inherent row order<span class="sev high">high</span></h3>
+      <p>Unique <span class="ref" title="Unique (tool 7)">7</span> keeps the first row per case ID based on the order Alteryx processes rows, which SQL does not guarantee. Without an explicit ORDER BY in a ROW_NUMBER() rewrite, Redshift could keep a different row, changing which case details survive.</p>
+    </div>
+  
+    <div class="risk high">
+      <h3>Mixed date formats in one field<span class="sev high">high</span></h3>
+      <p>The open_date field contains at least three different date formats (e.g. slashes, dashes with month names, year-first), handled in Alteryx with nested conditions. Redshift&#39;s date functions are stricter about format, so each format must be tested separately to avoid silent parsing errors or nulls.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Union relies on matching column names, not position<span class="sev medium">medium</span></h3>
+      <p>Union <span class="ref" title="Union (tool 5)">5</span> combines sources by matching column names, and one source renames a column beforehand <span class="ref" title="Select (tool 4)">4</span>. Redshift&#39;s UNION ALL matches by column position, so columns must be listed in the same order in every SELECT or data will land in the wrong column.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Blank vs. NULL handling in member ID<span class="sev medium">medium</span></h3>
+      <p>The Formula <span class="ref" title="Formula (tool 6)">6</span> treats empty text and NULL member IDs the same way, but SQL distinguishes them. The rewrite needs to explicitly check for both cases or some &#39;UNKNOWN&#39; labels could be missed.</p>
+    </div>
+  
+    <div class="risk low">
+      <h3>Text case normalization may differ<span class="sev low">low</span></h3>
+      <p>Status text is capitalized using TitleCase; Redshift&#39;s INITCAP can produce different results for certain words (e.g. hyphenated or apostrophe-containing text), so output should be spot-checked.</p>
+    </div>
+  
+    <div class="risk low">
+      <h3>CSV inputs carry no data types<span class="sev low">low</span></h3>
+      <p>Source files are plain CSVs with no enforced column types, so the Redshift table definition must explicitly set correct types during COPY load.</p>
+    </div>
+  
+
+  <h2>Next steps</h2>
+  <ol class="steps"><li>Confirm the exact set of date formats present in open_date across all three months before writing the TO_DATE logic.</li><li>Define the ORDER BY rule that determines which row should be kept as &#39;first&#39; when deduplicating case_id in the ROW_NUMBER() rewrite.</li><li>Align column order and names across all three input sources before converting the Union to UNION ALL.</li><li>Decide whether empty-string and NULL member_id values should both map to &#39;UNKNOWN&#39; and encode that explicitly.</li><li>Spot-check INITCAP output against the original TitleCase results for status values.</li><li>Define target table schema and data types for the Redshift COPY load of the CSV inputs.</li></ol>
+
+  <h2>What the workflow does</h2>
+  <ul class="parts">
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span><span class="ref" title="Input Data (tool 3)">3</span><span class="ref" title="Select (tool 4)">4</span><span class="ref" title="Union (tool 5)">5</span> Three monthly CSV files are read in, one column is renamed [4], and all three are stacked together with the Union [5].</li>
+    <li><span class="ref" title="Formula (tool 6)">6</span> The Formula [6] tool parses dates in several formats, fills in missing member IDs, and standardizes status text.</li>
+    <li><span class="ref" title="Unique (tool 7)">7</span> The Unique [7] tool removes duplicate cases, keeping only the first row seen for each case ID.</li>
+    <li><span class="ref" title="Summarize (tool 9)">9</span><span class="ref" title="Sort (tool 10)">10</span><span class="ref" title="Output Data (tool 11)">11</span> Remaining cases are counted by month and program, sorted, and written out as the final trend report.</li>
+  </ul>
+  
+
+  <h2>Details</h2>
+  <details>
+    <summary>Every tool and its Redshift equivalent (10)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>What it does</th><th>Difficulty</th><th>In Redshift</th></tr>
+      
+      <tr><td>Input Data <span class="ref">1</span></td><td>cases_2026_07.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Input Data <span class="ref">2</span></td><td>cases_2026_08.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Input Data <span class="ref">3</span></td><td>cases_2026_09.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Select <span class="ref">4</span></td><td>program_name as program</td>
+          <td><span class="sev low">low</span></td><td>Column list with aliases and CAST</td></tr>
+      
+      <tr><td>Union <span class="ref">5</span></td><td>mode: ByName</td>
+          <td><span class="sev medium">medium</span></td><td>UNION ALL</td></tr>
+      
+      <tr><td>Formula <span class="ref">6</span></td><td>new: open_dt, status, member_id, case_month</td>
+          <td><span class="sev medium">medium</span></td><td>Calculated columns (CASE, DATEDIFF, CAST, ...)</td></tr>
+      
+      <tr><td>Unique <span class="ref">7</span></td><td>on case_id</td>
+          <td><span class="sev medium">medium</span></td><td>ROW_NUMBER() OVER (PARTITION BY ...) = 1</td></tr>
+      
+      <tr><td>Summarize <span class="ref">9</span></td><td>by case_month, program; Count case_id</td>
+          <td><span class="sev low">low</span></td><td>GROUP BY with aggregates</td></tr>
+      
+      <tr><td>Sort <span class="ref">10</span></td><td>by case_month</td>
+          <td><span class="sev low">low</span></td><td>ORDER BY</td></tr>
+      
+      <tr><td>Output Data <span class="ref">11</span></td><td>wf3_monthly_trend.csv</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+    </table></div>
+  </details>
+  <details>
+    <summary>Every gotcha found (12 kinds, 15 in total)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Issue</th><th>Tools</th><th>Evidence</th><th>What to do in Redshift</th></tr>
+      
+      <tr><td><span class="sev high">high</span><br>Several date formats are parsed in one expression, so the source data mixes formats.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(Contains([open_date], &#34;/&#34;), DateTimeParse([open_date],&#34;%m/%d/%Y&#34;), IIF(Length([open_date]) = 11, DateTimeParse([open_date],&#34;%d-%b-%Y&#34;), DateTimeParse([open_date],&#34;%Y/%m/%d&#34;)))</code><br></td>
+          <td>Handle each format explicitly. Alteryx can tolerate small format mismatches (such as separators) that a literal SQL translation may not; test every format.</td></tr>
+      
+      <tr><td><span class="sev high">high</span><br>Unique keeps the FIRST row per key; which row is first depends on the order data arrives.</td>
+          <td><span class="ref">7</span></td>
+          <td><code>Unique on: case_id</code><br></td>
+          <td>ROW_NUMBER() OVER (PARTITION BY key ORDER BY ...) = 1 with an explicit ORDER BY. Plain DISTINCT only removes fully identical rows.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Text search inside a string; case sensitivity may differ.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(Contains([open_date], &#34;/&#34;), DateTimeParse([open_date],&#34;%m/%d/%Y&#34;), IIF(Length([open_date]) = 11, DateTimeParse([open_date],&#34;%d-%b-%Y&#34;), DateTimeParse([open_date],&#34;%Y/%m/%d&#34;)))</code><br></td>
+          <td>POSITION(...) &gt; 0 or LIKE / ILIKE. Confirm whether matching should ignore case.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Converts text to dates using Alteryx format codes (%Y, %m, %d, %b).</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(Contains([open_date], &#34;/&#34;), DateTimeParse([open_date],&#34;%m/%d/%Y&#34;), IIF(Length([open_date]) = 11, DateTimeParse([open_date],&#34;%d-%b-%Y&#34;), DateTimeParse([open_date],&#34;%Y/%m/%d&#34;)))</code><br></td>
+          <td>TO_DATE or TO_TIMESTAMP with Redshift format codes (YYYY, MM, DD, MON).</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>IsEmpty is true for both NULL and empty text; SQL treats these separately.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(IsEmpty([member_id]), &#34;UNKNOWN&#34;, [member_id])</code><br></td>
+          <td>(x IS NULL OR x = &#39;&#39;), or COALESCE(NULLIF(x, &#39;&#39;), ...).</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>A column is renamed right before a Union, so the sources use different column names.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>program_name -&gt; program</code><br></td>
+          <td>Apply the same alias in that SELECT before the UNION ALL.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Union matches columns by name.</td>
+          <td><span class="ref">5</span></td>
+          <td><code>Mode: ByName</code><br></td>
+          <td>UNION ALL matches columns by position. List columns in the same order in every SELECT.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Reads a CSV file, which carries no data types.</td>
+          <td><span class="ref">1</span><span class="ref">2</span><span class="ref">3</span></td>
+          <td><code>cases_2026_07.csv</code><br><code>cases_2026_08.csv</code><br><code>cases_2026_09.csv</code><br></td>
+          <td>Load with COPY into a table whose column types are defined explicitly.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Formats dates as text using Alteryx format codes.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>DateTimeFormat([open_dt],&#34;%Y-%m&#34;)</code><br></td>
+          <td>TO_CHAR with Redshift format codes (e.g. &#39;YYYY-MM&#39;).</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>IIF has no Redshift equivalent.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(Contains([open_date], &#34;/&#34;), DateTimeParse([open_date],&#34;%m/%d/%Y&#34;), IIF(Length([open_date]) = 11, DateTimeParse([open_date],&#34;%d-%b-%Y&#34;), DateTimeParse([open_date],&#34;%Y/%m/%d&#34;)))</code><br><code>IIF(IsEmpty([member_id]), &#34;UNKNOWN&#34;, [member_id])</code><br></td>
+          <td>Rewrite as CASE WHEN ... THEN ... ELSE ... END.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>String length, here possibly used to detect a format.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>IIF(Contains([open_date], &#34;/&#34;), DateTimeParse([open_date],&#34;%m/%d/%Y&#34;), IIF(Length([open_date]) = 11, DateTimeParse([open_date],&#34;%d-%b-%Y&#34;), DateTimeParse([open_date],&#34;%Y/%m/%d&#34;)))</code><br></td>
+          <td>LEN or LENGTH.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Capitalizes words to normalize inconsistent text.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>TitleCase([status])</code><br></td>
+          <td>INITCAP. Results can differ for some words; spot-check the output.</td></tr>
+      
+    </table></div>
+  </details>
+
+  <footer>
+    <p>How this report was made: code read the workflow file, scored each tool against editable rules (tool_rules.yaml), and checked formulas and settings for known migration issues (formula_gotchas.yaml). The AI only explains those facts. The score is the rules' output, not the AI's opinion.</p>
+    <p>Limits: the analyzer reads workflow logic, not data. Data-dependent issues, such as a date format that doesn't match the actual data, are flagged as risks to test rather than detected directly. Effort and cost aren't estimated.</p>
+  </footer>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontFamily: "IBM Plex Sans, Segoe UI, sans-serif", lineColor: "#5b6577", edgeLabelBackground: "#f3f5f8" } });
+</script>
+</body>
+</html>
