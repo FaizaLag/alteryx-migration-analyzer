@@ -1,3 +1,4 @@
+
 """Draw each workflow's data flow as a Mermaid flowchart (lineage diagram).
 
 Reads parsed workflows (from parser.py) and tool names and difficulty from
@@ -85,10 +86,11 @@ def tool_detail(tool):
     return ""
 
 
-def to_mermaid(parsed, rules):
+def to_mermaid(parsed, rules, direction="LR"):
+    """Mermaid flowchart text. direction: LR (left to right) or TB (top to bottom)."""
     tool_rules = rules["tools"]
     connected = {c["from_tool"] for c in parsed["connections"]} | {c["to_tool"] for c in parsed["connections"]}
-    lines = ["flowchart LR"]
+    lines = [f"flowchart {direction}"]
     classes = {level: [] for level in STYLES}
 
     for tool in parsed["tools"]:
