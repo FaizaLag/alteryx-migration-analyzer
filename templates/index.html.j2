@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alteryx to Redshift: migration assessments</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1f2a44; --muted:#5b6577; --line:#d9dee7; --wash:#f3f5f8; --high:#b02a37; --low:#2e7d4f; }
+  body { margin:0; background:var(--wash); color:var(--ink); font:16px/1.6 "IBM Plex Sans","Segoe UI",system-ui,sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:40px 24px 64px; background:#fff; }
+  h1 { font-size:1.9rem; line-height:1.2; margin:0 0 4px; font-weight:600; }
+  .sub { color:var(--muted); margin:0 0 32px; }
+  .row { display:grid; grid-template-columns: 4.5rem 1fr; gap:16px; padding:16px 0; border-top:1px solid var(--line); text-decoration:none; color:inherit; }
+  .row:hover h2, .row:focus-visible h2 { text-decoration: underline; }
+  .row:focus-visible { outline:3px solid #4c7bd9; outline-offset:2px; }
+  .num { font-size:2rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums; }
+  .num span { font-size:.9rem; color:var(--muted); font-weight:400; }
+  .bar { display:grid; grid-template-columns:repeat(10,1fr); gap:2px; margin-top:8px; }
+  .bar i { height:6px; background:var(--wash); border:1px solid var(--line); }
+  .bar i.on.low { background:var(--low); border-color:var(--low); }
+  .bar i.on.medium { background:#c99a1a; border-color:#c99a1a; }
+  .bar i.on.high { background:var(--high); border-color:var(--high); }
+  h2 { font-size:1.05rem; margin:0; font-weight:600; word-break:break-word; }
+  p { margin:2px 0 0; color:var(--muted); font-size:.92rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Alteryx to Redshift: migration assessments</h1>
+  <p class="sub">{{ rows | length }} workflows, hardest first. Generated {{ generated }}.</p>
+  {% for r in rows %}
+  <a class="row" href="{{ r.stem }}.html">
+    <div><div class="num">{{ r.score }}<span>/10</span></div>
+      <div class="bar">{% for i in range(1, 11) %}<i class="{% if i <= r.score %}on {{ r.level }}{% endif %}"></i>{% endfor %}</div></div>
+    <div><h2>{{ r.file }}</h2><p>{{ r.band }}. {{ r.tools }} tools, {{ r.gotchas }} gotchas. Main risk: {{ r.top_risk }}</p></div>
+  </a>
+  {% endfor %}
+</main>
+</body>
+</html>

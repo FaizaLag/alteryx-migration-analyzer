@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ w.file_name }}: Redshift migration assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44; --muted: #5b6577; --line: #d9dee7; --wash: #f3f5f8; --paper: #ffffff;
+    --high: #b02a37; --high-bg: #f8d7da; --med: #8a6508; --med-bg: #fff3cd;
+    --low: #2e7d4f; --low-bg: #d1e7dd; --none-bg: #e9ecef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wash); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; background: var(--paper); }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 4px; font-weight: 600; word-break: break-word; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; font-weight: 600; }
+  h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  .sub { color: var(--muted); margin-bottom: 32px; }
+  a { color: var(--ink); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid #4c7bd9; outline-offset: 2px; }
+
+  /* The score scale: the one bold element */
+  .scale { margin: 8px 0 8px; }
+  .scale-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .scale-num { font-size: 3.2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scale-num span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .scale-band { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .seg { height: 14px; background: var(--wash); border: 1px solid var(--line); }
+  .seg.on.low { background: var(--low); border-color: var(--low); }
+  .seg.on.medium { background: #c99a1a; border-color: #c99a1a; }
+  .seg.on.high { background: var(--high); border-color: var(--high); }
+  .ticks { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted);
+           font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .facts { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+
+  .summary { font-size: 1.08rem; border-left: 3px solid var(--ink); padding-left: 16px; }
+  .ai-note { color: var(--muted); font-size: .85rem; }
+
+  .ref { display: inline-block; font-size: .78em; font-weight: 600; padding: 0 5px; margin: 0 1px;
+         border: 1px solid var(--line); border-radius: 3px; background: var(--wash); white-space: nowrap; }
+
+  .diagram { overflow-x: auto; border: 1px solid var(--line); padding: 16px; }
+  .diagram pre.mermaid { margin: 0; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #999; }
+
+  .risk { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .risk.high { border-color: var(--high); } .risk.medium { border-color: #c99a1a; } .risk.low { border-color: var(--low); }
+  .sev { font-size: .78rem; font-weight: 600; padding: 1px 7px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .sev.high { background: var(--high-bg); color: var(--high); }
+  .sev.medium { background: var(--med-bg); color: var(--med); }
+  .sev.low { background: var(--low-bg); color: var(--low); }
+  .sev.none { background: var(--none-bg); color: var(--muted); }
+
+  ol.steps { padding-left: 1.4em; } ol.steps li { margin-bottom: 8px; max-width: 72ch; }
+  ul.parts { list-style: none; padding: 0; } ul.parts li { margin-bottom: 8px; }
+
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .85em; word-break: break-word; }
+
+  .callout { background: var(--wash); padding: 12px 16px; margin: 16px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+  footer p { max-width: none; }
+
+  @media (max-width: 600px) { main { padding: 24px 16px 48px; } .scale-num { font-size: 2.6rem; } }
+  @media print { body { background: none; } main { padding: 0; } details { display: block; } .diagram { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>{{ w.file_name }}</h1>
+  <p class="sub">Redshift migration assessment{% if w.kind == "macro" %} of a macro{% endif %}, generated {{ generated }}</p>
+
+  <section class="scale" aria-label="Difficulty score {{ s.score }} out of 10">
+    <div class="scale-head">
+      <div class="scale-num">{{ s.score }}<span>/10</span></div>
+      <div class="scale-band">{{ band }}</div>
+    </div>
+    <div class="segments">
+      {% for i in range(1, 11) %}<div class="seg {% if i <= s.score %}on {{ level }}{% endif %}"></div>{% endfor %}
+    </div>
+    <div class="ticks">{% for i in range(1, 11) %}<span>{{ i }}</span>{% endfor %}</div>
+    <p class="facts">{{ tool_count }} tools, {{ s.total_points }} difficulty points:
+      {{ s.difficulty_counts.high }} high, {{ s.difficulty_counts.medium }} medium, {{ s.difficulty_counts.low }} low.
+      {{ g.findings | length }} migration gotchas found.</p>
+  </section>
+
+  {% if macros %}
+  <div class="callout">This workflow calls {% for m in macros %}<a href="{{ m.link }}">{{ m.file }}</a>{% if not loop.last %}, {% endif %}{% endfor %}. Its logic is in a separate file and is assessed in its own report.</div>
+  {% endif %}
+
+  <h2>In short</h2>
+  {% if ai %}
+    <p class="summary">{{ refs(ai.summary) }}</p>
+    <p class="ai-note">Written by AI ({{ ai._check.model }}) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
+  {% else %}
+    <p>The AI summary hasn't been generated for this workflow yet.</p>
+  {% endif %}
+
+  <h2>How data flows</h2>
+  <div class="diagram"><pre class="mermaid">{{ mermaid }}</pre></div>
+  <div class="legend">
+    <span><i style="background:#f8d7da"></i>High difficulty</span>
+    <span><i style="background:#fff3cd"></i>Medium</span>
+    <span><i style="background:#d1e7dd"></i>Low</span>
+    <span><i style="background:#e9ecef"></i>Nothing to migrate</span>
+  </div>
+
+  {% if ai %}
+  <h2>Main risks</h2>
+  {% for r in ai.risks %}
+    <div class="risk {{ r.severity }}">
+      <h3>{{ r.title }}<span class="sev {{ r.severity }}">{{ r.severity }}</span></h3>
+      <p>{{ refs(r.detail) }}</p>
+    </div>
+  {% endfor %}
+
+  <h2>Next steps</h2>
+  <ol class="steps">{% for step in ai.next_steps %}<li>{{ refs(step) }}</li>{% endfor %}</ol>
+
+  <h2>What the workflow does</h2>
+  <ul class="parts">{% for k in ai.key_components %}
+    <li>{% for t in k.tools %}{{ ref_chip(t) }}{% endfor %} {{ k.description }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <h2>Details</h2>
+  <details>
+    <summary>Every tool and its Redshift equivalent ({{ tool_count }})</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>What it does</th><th>Difficulty</th><th>In Redshift</th></tr>
+      {% for t in tools %}
+      <tr><td>{{ t.name }} <span class="ref">{{ t.tool_id }}</span></td><td>{{ t.does }}</td>
+          <td><span class="sev {{ t.difficulty }}">{{ t.difficulty }}</span></td><td>{{ t.redshift or "" }}</td></tr>
+      {% endfor %}
+    </table></div>
+  </details>
+  <details>
+    <summary>Every gotcha found ({{ gotcha_groups | length }} kinds, {{ g.findings | length }} in total)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Issue</th><th>Tools</th><th>Evidence</th><th>What to do in Redshift</th></tr>
+      {% for x in gotcha_groups %}
+      <tr><td><span class="sev {{ x.severity }}">{{ x.severity }}</span><br>{{ x.message }}</td>
+          <td>{% for t in x.tools %}<span class="ref">{{ t }}</span>{% endfor %}</td>
+          <td>{% for e in x.evidence %}<code>{{ e }}</code><br>{% endfor %}</td>
+          <td>{{ x.redshift }}</td></tr>
+      {% endfor %}
+    </table></div>
+  </details>
+
+  <footer>
+    <p>How this report was made: code read the workflow file, scored each tool against editable rules (tool_rules.yaml), and checked formulas and settings for known migration issues (formula_gotchas.yaml). The AI only explains those facts. The score is the rules' output, not the AI's opinion.</p>
+    <p>Limits: the analyzer reads workflow logic, not data. Data-dependent issues, such as a date format that doesn't match the actual data, are flagged as risks to test rather than detected directly. Effort and cost aren't estimated.</p>
+  </footer>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontFamily: "IBM Plex Sans, Segoe UI, sans-serif", lineColor: "#5b6577", edgeLabelBackground: "#f3f5f8" } });
+</script>
+</body>
+</html>

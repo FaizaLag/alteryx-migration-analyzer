@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alteryx to Redshift: migration assessments</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1f2a44; --muted:#5b6577; --line:#d9dee7; --wash:#f3f5f8; --high:#b02a37; --low:#2e7d4f; }
+  body { margin:0; background:var(--wash); color:var(--ink); font:16px/1.6 "IBM Plex Sans","Segoe UI",system-ui,sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:40px 24px 64px; background:#fff; }
+  h1 { font-size:1.9rem; line-height:1.2; margin:0 0 4px; font-weight:600; }
+  .sub { color:var(--muted); margin:0 0 32px; }
+  .row { display:grid; grid-template-columns: 4.5rem 1fr; gap:16px; padding:16px 0; border-top:1px solid var(--line); text-decoration:none; color:inherit; }
+  .row:hover h2, .row:focus-visible h2 { text-decoration: underline; }
+  .row:focus-visible { outline:3px solid #4c7bd9; outline-offset:2px; }
+  .num { font-size:2rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums; }
+  .num span { font-size:.9rem; color:var(--muted); font-weight:400; }
+  .bar { display:grid; grid-template-columns:repeat(10,1fr); gap:2px; margin-top:8px; }
+  .bar i { height:6px; background:var(--wash); border:1px solid var(--line); }
+  .bar i.on.low { background:var(--low); border-color:var(--low); }
+  .bar i.on.medium { background:#c99a1a; border-color:#c99a1a; }
+  .bar i.on.high { background:var(--high); border-color:var(--high); }
+  h2 { font-size:1.05rem; margin:0; font-weight:600; word-break:break-word; }
+  p { margin:2px 0 0; color:var(--muted); font-size:.92rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Alteryx to Redshift: migration assessments</h1>
+  <p class="sub">5 workflows, hardest first. Generated October 01, 2026.</p>
+  
+  <a class="row" href="wf4_savings_report.html">
+    <div><div class="num">9<span>/10</span></div>
+      <div class="bar"><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class="on high"></i><i class=""></i></div></div>
+    <div><h2>wf4_savings_report.yxmd</h2><p>Major rework. 17 tools, 16 gotchas. Main risk: Python logic has no SQL equivalent</p></div>
+  </a>
+  
+  <a class="row" href="wf3_monthly_trend.html">
+    <div><div class="num">6<span>/10</span></div>
+      <div class="bar"><i class="on medium"></i><i class="on medium"></i><i class="on medium"></i><i class="on medium"></i><i class="on medium"></i><i class="on medium"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+    <div><h2>wf3_monthly_trend.yxmd</h2><p>Design decisions needed. 10 tools, 15 gotchas. Main risk: Date parsing logic depends on mixed formats in source data</p></div>
+  </a>
+  
+  <a class="row" href="wf2_cases_by_member.html">
+    <div><div class="num">4<span>/10</span></div>
+      <div class="bar"><i class="on low"></i><i class="on low"></i><i class="on low"></i><i class="on low"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+    <div><h2>wf2_cases_by_member.yxmd</h2><p>A few rewrites. 6 tools, 10 gotchas. Main risk: Average on whole-number field loses decimals</p></div>
+  </a>
+  
+  <a class="row" href="wf1_active_members.html">
+    <div><div class="num">2<span>/10</span></div>
+      <div class="bar"><i class="on low"></i><i class="on low"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+    <div><h2>wf1_active_members.yxmd</h2><p>Direct translation. 4 tools, 1 gotchas. Main risk: CSV source has no defined data types</p></div>
+  </a>
+  
+  <a class="row" href="wf4_program_summary.html">
+    <div><div class="num">1<span>/10</span></div>
+      <div class="bar"><i class="on low"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div></div>
+    <div><h2>wf4_program_summary.yxmc</h2><p>Direct translation. 2 tools, 0 gotchas. Main risk: (no AI summary yet)</p></div>
+  </a>
+  
+</main>
+</body>
+</html>

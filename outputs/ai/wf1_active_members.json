@@ -1,29 +1,29 @@
 {
-  "summary": "This workflow reads a members CSV file, keeps only active members, renames and drops a couple of columns, then writes the result to an output CSV. It scored 2 out of 10, meaning it is a direct translation to SQL with no complex logic. All four tools are simple, low-difficulty steps with standard SQL equivalents.",
+  "summary": "This workflow reads a members CSV file, keeps only rows where status is Active, renames and drops a couple of columns, then writes the result to an output CSV. It scores 2 out of 10, meaning it is a direct translation to SQL with no design decisions needed. All four tools are simple, low-difficulty operations that map one-to-one onto standard SQL clauses.",
   "key_components": [
     {
       "tools": [
         1
       ],
-      "description": "Loads member data from a CSV file."
+      "description": "Loads member data from a CSV file, which becomes a COPY from S3 or an existing table in Redshift."
     },
     {
       "tools": [
         2
       ],
-      "description": "Filters records to keep only those with status Active, which becomes a WHERE clause."
+      "description": "Filters rows to only those with status equal to Active, which becomes a WHERE clause."
     },
     {
       "tools": [
         3
       ],
-      "description": "Selects and renames the plan_type column to plan, and drops two other columns."
+      "description": "Renames the plan_type column to plan and drops two other columns, which becomes a column list with aliases in the SELECT."
     },
     {
       "tools": [
         4
       ],
-      "description": "Writes the final filtered and selected data to an output file, equivalent to a CREATE TABLE AS or UNLOAD in Redshift."
+      "description": "Writes the final result to a CSV output, which becomes a CREATE TABLE AS, INSERT INTO, or UNLOAD to S3."
     }
   ],
   "risks": [
@@ -33,20 +33,21 @@
       "tools": [
         1
       ],
-      "detail": "A CSV file carries no column type information, so the Redshift table used to load it must have explicit column types defined; otherwise values may be loaded or interpreted incorrectly."
+      "detail": "The input file is a CSV, which carries no column data types. When loading with COPY into Redshift, column types must be explicitly defined to avoid type mismatches or load errors."
     }
   ],
   "next_steps": [
-    "Define explicit column data types for the target Redshift table before loading members.csv via COPY.",
-    "Confirm which two columns are dropped in the Select [3] step to replicate the exact column list in SQL.",
-    "Decide whether the final output should be a Redshift table (CREATE TABLE AS or INSERT INTO) or an UNLOAD to S3.",
-    "Validate the WHERE clause logic for status = Active against the source data to ensure consistent filtering."
+    "Confirm the target column data types for the members table before writing the COPY/CREATE TABLE statement.",
+    "Translate the Filter [2] condition directly into a WHERE clause.",
+    "Translate the Select [3] renaming and column drop into the SELECT column list.",
+    "Decide whether Output Data [4] should become a CREATE TABLE AS, INSERT INTO, or UNLOAD to S3 based on downstream use.",
+    "Validate row counts and column values against the original CSV output after migration."
   ],
   "_check": {
     "model": "claude-sonnet-5",
     "usage": {
       "input_tokens": 1366,
-      "output_tokens": 584
+      "output_tokens": 653
     },
     "uncited_or_invented_tool_ids": []
   }

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wf4_savings_report.yxmd: Redshift migration assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44; --muted: #5b6577; --line: #d9dee7; --wash: #f3f5f8; --paper: #ffffff;
+    --high: #b02a37; --high-bg: #f8d7da; --med: #8a6508; --med-bg: #fff3cd;
+    --low: #2e7d4f; --low-bg: #d1e7dd; --none-bg: #e9ecef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wash); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; background: var(--paper); }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 4px; font-weight: 600; word-break: break-word; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; font-weight: 600; }
+  h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  .sub { color: var(--muted); margin-bottom: 32px; }
+  a { color: var(--ink); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid #4c7bd9; outline-offset: 2px; }
+
+  /* The score scale: the one bold element */
+  .scale { margin: 8px 0 8px; }
+  .scale-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .scale-num { font-size: 3.2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scale-num span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .scale-band { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .seg { height: 14px; background: var(--wash); border: 1px solid var(--line); }
+  .seg.on.low { background: var(--low); border-color: var(--low); }
+  .seg.on.medium { background: #c99a1a; border-color: #c99a1a; }
+  .seg.on.high { background: var(--high); border-color: var(--high); }
+  .ticks { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted);
+           font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .facts { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+
+  .summary { font-size: 1.08rem; border-left: 3px solid var(--ink); padding-left: 16px; }
+  .ai-note { color: var(--muted); font-size: .85rem; }
+
+  .ref { display: inline-block; font-size: .78em; font-weight: 600; padding: 0 5px; margin: 0 1px;
+         border: 1px solid var(--line); border-radius: 3px; background: var(--wash); white-space: nowrap; }
+
+  .diagram { overflow-x: auto; border: 1px solid var(--line); padding: 16px; }
+  .diagram pre.mermaid { margin: 0; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #999; }
+
+  .risk { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .risk.high { border-color: var(--high); } .risk.medium { border-color: #c99a1a; } .risk.low { border-color: var(--low); }
+  .sev { font-size: .78rem; font-weight: 600; padding: 1px 7px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .sev.high { background: var(--high-bg); color: var(--high); }
+  .sev.medium { background: var(--med-bg); color: var(--med); }
+  .sev.low { background: var(--low-bg); color: var(--low); }
+  .sev.none { background: var(--none-bg); color: var(--muted); }
+
+  ol.steps { padding-left: 1.4em; } ol.steps li { margin-bottom: 8px; max-width: 72ch; }
+  ul.parts { list-style: none; padding: 0; } ul.parts li { margin-bottom: 8px; }
+
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .85em; word-break: break-word; }
+
+  .callout { background: var(--wash); padding: 12px 16px; margin: 16px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+  footer p { max-width: none; }
+
+  @media (max-width: 600px) { main { padding: 24px 16px 48px; } .scale-num { font-size: 2.6rem; } }
+  @media print { body { background: none; } main { padding: 0; } details { display: block; } .diagram { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>wf4_savings_report.yxmd</h1>
+  <p class="sub">Redshift migration assessment, generated October 01, 2026</p>
+
+  <section class="scale" aria-label="Difficulty score 9 out of 10">
+    <div class="scale-head">
+      <div class="scale-num">9<span>/10</span></div>
+      <div class="scale-band">Major rework</div>
+    </div>
+    <div class="segments">
+      <div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg on high"></div><div class="seg "></div>
+    </div>
+    <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+    <p class="facts">17 tools, 40 difficulty points:
+      2 high, 4 medium, 11 low.
+      16 migration gotchas found.</p>
+  </section>
+
+  
+  <div class="callout">This workflow calls <a href="wf4_program_summary.html">wf4_program_summary.yxmc</a>. Its logic is in a separate file and is assessed in its own report.</div>
+  
+
+  <h2>In short</h2>
+  
+    <p class="summary">This workflow builds a savings report by joining claims, benchmark, and case data, calculating a running savings total per member, parsing a note field, running a custom Python calculation, and producing a program-level summary through a separate macro. It scores 9/10, the highest difficulty band, mainly because of the Python tool <span class="ref" title="Python (tool 13)">13</span> (no SQL equivalent) and the Macro <span class="ref" title="Macro (tool 16)">16</span> (logic lives in a separate file that must be migrated independently). RegEx <span class="ref" title="RegEx (tool 3)">3</span> and Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span> add further rework because their logic needs different techniques in Redshift. Four separate output files also mean four separate SQL outputs to build and validate.</p>
+    <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
+  
+
+  <h2>How data flows</h2>
+  <div class="diagram"><pre class="mermaid">flowchart TB
+    t1[(&#34;Input Data&lt;br/&gt;claims.csv&#34;)]
+    t2[&#34;Formula&lt;br/&gt;new: allowed&#34;]
+    t3[&#34;RegEx&lt;br/&gt;parse navigator_note&#34;]
+    t5[(&#34;Input Data&lt;br/&gt;benchmarks.csv&#34;)]
+    t6[&#34;Join&lt;br/&gt;on proc_code&#34;]
+    t8[&#34;Formula&lt;br/&gt;new: savings&#34;]
+    t9[(&#34;Input Data&lt;br/&gt;cases.csv&#34;)]
+    t10[&#34;Join&lt;br/&gt;on case_id&#34;]
+    t11[&#34;Sort&lt;br/&gt;by member_id, service_date&#34;]
+    t12[&#34;Multi-Row Formula&lt;br/&gt;new: running_savings by member_id&#34;]
+    t13[&#34;Python&lt;br/&gt;Python code&#34;]
+    t16[&#34;Macro&lt;br/&gt;wf4_program_summary.yxmc&#34;]
+    t17[&#34;Summarize&lt;br/&gt;by program&#34;]
+    t7[(&#34;Output Data&lt;br/&gt;wf4_unmatched_claims.csv&#34;)]
+    t14[(&#34;Output Data&lt;br/&gt;wf4_claim_savings.csv&#34;)]
+    t15[(&#34;Output Data&lt;br/&gt;wf4_claim_savings.yxdb&#34;)]
+    t18[(&#34;Output Data&lt;br/&gt;wf4_program_summary.csv&#34;)]
+    t1 --&gt; t2
+    t2 --&gt; t3
+    t3 --&gt;|left| t6
+    t5 --&gt;|right| t6
+    t6 --&gt;|unmatched left| t7
+    t6 --&gt;|matched| t8
+    t8 --&gt;|left| t10
+    t9 --&gt;|right| t10
+    t10 --&gt;|matched| t11
+    t11 --&gt; t12
+    t12 --&gt; t13
+    t13 --&gt; t14
+    t13 --&gt; t15
+    t13 --&gt; t17
+    t13 --&gt; t16
+    t17 --&gt;|control| t16
+    t16 --&gt; t18
+    classDef high fill:#f8d7da,stroke:#b02a37,color:#3d0a10
+    class t13,t16 high
+    classDef medium fill:#fff3cd,stroke:#b8860b,color:#3d2e00
+    class t2,t3,t8,t12 medium
+    classDef low fill:#d1e7dd,stroke:#2e7d4f,color:#0b2e1c
+    class t1,t5,t6,t9,t10,t11,t17,t7,t14,t15,t18 low
+    classDef none fill:#e9ecef,stroke:#6c757d,color:#212529</pre></div>
+  <div class="legend">
+    <span><i style="background:#f8d7da"></i>High difficulty</span>
+    <span><i style="background:#fff3cd"></i>Medium</span>
+    <span><i style="background:#d1e7dd"></i>Low</span>
+    <span><i style="background:#e9ecef"></i>Nothing to migrate</span>
+  </div>
+
+  
+  <h2>Main risks</h2>
+  
+    <div class="risk high">
+      <h3>Python logic has no SQL equivalent<span class="sev high">high</span></h3>
+      <p>The Python tool <span class="ref" title="Python (tool 13)">13</span> computes a &#39;top saver&#39; flag using a statistical percentile (quantile). Redshift has no Python UDF support after June 2026, so this logic must be rewritten in SQL (e.g. using PERCENTILE_CONT) or run outside Redshift.</p>
+    </div>
+  
+    <div class="risk high">
+      <h3>Macro logic not visible in this file<span class="sev high">high</span></h3>
+      <p>The Macro <span class="ref" title="Macro (tool 16)">16</span> calls a separate file (wf4_program_summary.yxmc) whose internal logic is not included in these facts. It must be assessed and migrated on its own before the full workflow&#39;s difficulty is known.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Running total needs a window function with explicit frame<span class="sev medium">medium</span></h3>
+      <p>The Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span> builds a running total row-by-row, which translates to a SQL window function (SUM OVER). Redshift requires an explicit frame clause (e.g. ROWS UNBOUNDED PRECEDING) when ORDER BY is used, or results will differ.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Unmatched join records used downstream<span class="sev medium">medium</span></h3>
+      <p>The Join <span class="ref" title="Join (tool 6)">6</span> passes its unmatched (non-joining) records to a separate output. This must be rebuilt as a distinct LEFT JOIN ... WHERE ... IS NULL query, since Redshift doesn&#39;t have a built-in &#39;unmatched&#39; output like Alteryx.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>RegEx behavior differs between Alteryx and Redshift<span class="sev medium">medium</span></h3>
+      <p>The RegEx tool <span class="ref" title="RegEx (tool 3)">3</span> is case-insensitive and extracts a capture group, but Redshift&#39;s REGEXP_SUBSTR is case-sensitive by default and returns the whole match unless extra parameters (&#39;i&#39;, &#39;e&#39;) are added. Redshift also defaults to POSIX regex syntax, not Perl-style, so the pattern may need rewriting.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Currency text-to-number conversion is fragile<span class="sev medium">medium</span></h3>
+      <p>Formulas <span class="ref" title="Formula (tool 2)">2</span> and <span class="ref" title="Formula (tool 8)">8</span> strip currency symbols and commas before converting text to numbers. In Redshift, any value that doesn&#39;t match the expected format will fail the entire query rather than just that row, so all formats in the real data must be accounted for.</p>
+    </div>
+  
+
+  <h2>Next steps</h2>
+  <ol class="steps"><li>Obtain and analyze the macro file wf4_program_summary.yxmc separately before finalizing the migration plan.</li><li>Decide how to replace the Python top-saver logic <span class="ref" title="Python (tool 13)">13</span>, e.g. rewrite with a SQL percentile function or run it in an external process.</li><li>Rebuild the running savings calculation <span class="ref" title="Multi-Row Formula (tool 12)">12</span> as a SQL window function with an explicit frame clause.</li><li>Test the regex pattern from <span class="ref" title="RegEx (tool 3)">3</span> in Redshift with the &#39;i&#39; and &#39;e&#39; parameters, and confirm POSIX vs Perl syntax compatibility.</li><li>Recreate the unmatched-join output <span class="ref" title="Join (tool 6)">6</span> as a separate LEFT JOIN query with an IS NULL filter.</li><li>Audit the real claims data for all currency formatting variants to ensure the CAST/REPLACE logic in <span class="ref" title="Formula (tool 2)">2</span> and <span class="ref" title="Formula (tool 8)">8</span> won&#39;t fail on real values.</li></ol>
+
+  <h2>What the workflow does</h2>
+  <ul class="parts">
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 5)">5</span><span class="ref" title="Input Data (tool 9)">9</span><span class="ref" title="Formula (tool 2)">2</span><span class="ref" title="RegEx (tool 3)">3</span><span class="ref" title="Join (tool 6)">6</span><span class="ref" title="Formula (tool 8)">8</span><span class="ref" title="Join (tool 10)">10</span> Loads claims, benchmarks, and case files, cleans/converts amount fields, parses a note field, and joins the three sources to calculate an &#39;allowed&#39; and &#39;savings&#39; amount.</li>
+    <li><span class="ref" title="Sort (tool 11)">11</span><span class="ref" title="Multi-Row Formula (tool 12)">12</span> Sorts records by member and service date, then calculates a running savings total per member row by row.</li>
+    <li><span class="ref" title="Python (tool 13)">13</span> Runs Python code that flags claims as &#39;top saver&#39; if their savings amount is above the 90th percentile.</li>
+    <li><span class="ref" title="Macro (tool 16)">16</span><span class="ref" title="Summarize (tool 17)">17</span> Summarizes savings by program using a separate macro file, combined with totals from a Summarize tool [17].</li>
+    <li><span class="ref" title="Output Data (tool 7)">7</span><span class="ref" title="Output Data (tool 14)">14</span><span class="ref" title="Output Data (tool 15)">15</span><span class="ref" title="Output Data (tool 18)">18</span> Writes four separate outputs: unmatched claims, claim savings (CSV and database file), and program summary.</li>
+  </ul>
+  
+
+  <h2>Details</h2>
+  <details>
+    <summary>Every tool and its Redshift equivalent (17)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>What it does</th><th>Difficulty</th><th>In Redshift</th></tr>
+      
+      <tr><td>Input Data <span class="ref">1</span></td><td>claims.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Formula <span class="ref">2</span></td><td>new: allowed</td>
+          <td><span class="sev medium">medium</span></td><td>Calculated columns (CASE, DATEDIFF, CAST, ...)</td></tr>
+      
+      <tr><td>RegEx <span class="ref">3</span></td><td>parse navigator_note</td>
+          <td><span class="sev medium">medium</span></td><td>REGEXP_SUBSTR / REGEXP_REPLACE</td></tr>
+      
+      <tr><td>Input Data <span class="ref">5</span></td><td>benchmarks.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Join <span class="ref">6</span></td><td>on proc_code</td>
+          <td><span class="sev low">low</span></td><td>INNER / LEFT JOIN</td></tr>
+      
+      <tr><td>Formula <span class="ref">8</span></td><td>new: savings</td>
+          <td><span class="sev medium">medium</span></td><td>Calculated columns (CASE, DATEDIFF, CAST, ...)</td></tr>
+      
+      <tr><td>Input Data <span class="ref">9</span></td><td>cases.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Join <span class="ref">10</span></td><td>on case_id</td>
+          <td><span class="sev low">low</span></td><td>INNER / LEFT JOIN</td></tr>
+      
+      <tr><td>Sort <span class="ref">11</span></td><td>by member_id, service_date</td>
+          <td><span class="sev low">low</span></td><td>ORDER BY</td></tr>
+      
+      <tr><td>Multi-Row Formula <span class="ref">12</span></td><td>new: running_savings by member_id</td>
+          <td><span class="sev medium">medium</span></td><td>Window functions (LAG, LEAD, SUM OVER with a frame clause)</td></tr>
+      
+      <tr><td>Python <span class="ref">13</span></td><td>Python code</td>
+          <td><span class="sev high">high</span></td><td>No equivalent; rewrite in SQL or run outside Redshift</td></tr>
+      
+      <tr><td>Macro <span class="ref">16</span></td><td>wf4_program_summary.yxmc</td>
+          <td><span class="sev high">high</span></td><td>Depends on the macro&#39;s contents</td></tr>
+      
+      <tr><td>Summarize <span class="ref">17</span></td><td>by program</td>
+          <td><span class="sev low">low</span></td><td>GROUP BY with aggregates</td></tr>
+      
+      <tr><td>Output Data <span class="ref">7</span></td><td>wf4_unmatched_claims.csv</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+      <tr><td>Output Data <span class="ref">14</span></td><td>wf4_claim_savings.csv</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+      <tr><td>Output Data <span class="ref">15</span></td><td>wf4_claim_savings.yxdb</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+      <tr><td>Output Data <span class="ref">18</span></td><td>wf4_program_summary.csv</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+    </table></div>
+  </details>
+  <details>
+    <summary>Every gotcha found (12 kinds, 16 in total)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Issue</th><th>Tools</th><th>Evidence</th><th>What to do in Redshift</th></tr>
+      
+      <tr><td><span class="sev high">high</span><br>Calls a macro, whose logic lives in a separate file.</td>
+          <td><span class="ref">16</span></td>
+          <td><code>wf4_program_summary.yxmc</code><br></td>
+          <td>Analyze the macro file on its own; it must be migrated too.</td></tr>
+      
+      <tr><td><span class="sev high">high</span><br>Runs Python code, which has no SQL equivalent.</td>
+          <td><span class="ref">13</span></td>
+          <td><code>from ayx import Alteryx | df = Alteryx.read(&#34;#1&#34;) | df[&#34;top_saver&#34;] = df[&#34;savings&#34;] &gt; df[&#34;savings&#34;].quantile(0.9) | Alteryx.write(df,1)</code><br></td>
+          <td>Rewrite the logic in SQL if possible, or run it outside Redshift. Python UDFs are no longer supported (after June 30, 2026).</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Unmatched Join records (L or R output) are used downstream.</td>
+          <td><span class="ref">6</span></td>
+          <td><code>Unmatched Left output used</code><br></td>
+          <td>LEFT JOIN ... WHERE right_key IS NULL, as a separate query.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>The RegEx tool is set to ignore case.</td>
+          <td><span class="ref">3</span></td>
+          <td><code>Case insensitive: True</code><br></td>
+          <td>Redshift regex is case-sensitive by default; add the &#39;i&#39; parameter.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>The RegEx tool extracts part of the match (a capture group).</td>
+          <td><span class="ref">3</span></td>
+          <td><code>Method: ParseComplex</code><br></td>
+          <td>REGEXP_SUBSTR returns the whole match unless the &#39;e&#39; parameter is added.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Uses a regular expression, and Redshift&#39;s default regex dialect differs from Alteryx&#39;s.</td>
+          <td><span class="ref">3</span></td>
+          <td><code>ref\W+(nav-\d{4}-\d+)</code><br></td>
+          <td>REGEXP_SUBSTR. Redshift uses POSIX by default; add the &#39;p&#39; parameter for Perl-style patterns (\d, \W, ...).</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Refers to values in other rows (e.g. a running total).</td>
+          <td><span class="ref">12</span></td>
+          <td><code>IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])</code><br></td>
+          <td>Window functions (LAG, LEAD, or SUM(...) OVER (PARTITION BY ... ORDER BY ... ROWS UNBOUNDED PRECEDING)). Redshift requires the frame clause when the window has ORDER BY.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Numbers arrive as formatted text (e.g. currency symbols, commas) and are cleaned before conversion.</td>
+          <td><span class="ref">2</span></td>
+          <td><code>ToNumber(Replace(Replace([allowed_amount], &#34;$&#34;,&#34;&#34;),&#34;,&#34;,&#34;&#34;))</code><br></td>
+          <td>Clean with REPLACE before CAST, or load the column with the right type. Every format in the data must be covered.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Converts text to numbers. A value that isn&#39;t a valid number can behave differently.</td>
+          <td><span class="ref">2</span><span class="ref">8</span></td>
+          <td><code>ToNumber(Replace(Replace([allowed_amount], &#34;$&#34;,&#34;&#34;),&#34;,&#34;,&#34;&#34;))</code><br><code>IIF([steered_flag]=&#34;Y&#34;, ToNumber([benchmark_cost]) - [allowed], 0)</code><br></td>
+          <td>CAST(x AS DECIMAL(...)). In Redshift, invalid text makes the whole query fail.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Reads a CSV file, which carries no data types.</td>
+          <td><span class="ref">1</span><span class="ref">5</span><span class="ref">9</span></td>
+          <td><code>claims.csv</code><br><code>benchmarks.csv</code><br><code>cases.csv</code><br></td>
+          <td>Load with COPY into a table whose column types are defined explicitly.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>IIF has no Redshift equivalent.</td>
+          <td><span class="ref">8</span><span class="ref">12</span></td>
+          <td><code>IIF([steered_flag]=&#34;Y&#34;, ToNumber([benchmark_cost]) - [allowed], 0)</code><br><code>IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])</code><br></td>
+          <td>Rewrite as CASE WHEN ... THEN ... ELSE ... END.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Null check.</td>
+          <td><span class="ref">12</span></td>
+          <td><code>IIF(IsNull([Row-1:running_savings]), [savings],[Row-1:running_savings] + [savings])</code><br></td>
+          <td>x IS NULL.</td></tr>
+      
+    </table></div>
+  </details>
+
+  <footer>
+    <p>How this report was made: code read the workflow file, scored each tool against editable rules (tool_rules.yaml), and checked formulas and settings for known migration issues (formula_gotchas.yaml). The AI only explains those facts. The score is the rules' output, not the AI's opinion.</p>
+    <p>Limits: the analyzer reads workflow logic, not data. Data-dependent issues, such as a date format that doesn't match the actual data, are flagged as risks to test rather than detected directly. Effort and cost aren't estimated.</p>
+  </footer>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontFamily: "IBM Plex Sans, Segoe UI, sans-serif", lineColor: "#5b6577", edgeLabelBackground: "#f3f5f8" } });
+</script>
+</body>
+</html>

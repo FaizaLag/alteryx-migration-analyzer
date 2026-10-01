@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wf2_cases_by_member.yxmd: Redshift migration assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44; --muted: #5b6577; --line: #d9dee7; --wash: #f3f5f8; --paper: #ffffff;
+    --high: #b02a37; --high-bg: #f8d7da; --med: #8a6508; --med-bg: #fff3cd;
+    --low: #2e7d4f; --low-bg: #d1e7dd; --none-bg: #e9ecef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wash); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; background: var(--paper); }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 4px; font-weight: 600; word-break: break-word; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; font-weight: 600; }
+  h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 600; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  .sub { color: var(--muted); margin-bottom: 32px; }
+  a { color: var(--ink); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid #4c7bd9; outline-offset: 2px; }
+
+  /* The score scale: the one bold element */
+  .scale { margin: 8px 0 8px; }
+  .scale-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .scale-num { font-size: 3.2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scale-num span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+  .scale-band { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .seg { height: 14px; background: var(--wash); border: 1px solid var(--line); }
+  .seg.on.low { background: var(--low); border-color: var(--low); }
+  .seg.on.medium { background: #c99a1a; border-color: #c99a1a; }
+  .seg.on.high { background: var(--high); border-color: var(--high); }
+  .ticks { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted);
+           font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .facts { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+
+  .summary { font-size: 1.08rem; border-left: 3px solid var(--ink); padding-left: 16px; }
+  .ai-note { color: var(--muted); font-size: .85rem; }
+
+  .ref { display: inline-block; font-size: .78em; font-weight: 600; padding: 0 5px; margin: 0 1px;
+         border: 1px solid var(--line); border-radius: 3px; background: var(--wash); white-space: nowrap; }
+
+  .diagram { overflow-x: auto; border: 1px solid var(--line); padding: 16px; }
+  .diagram pre.mermaid { margin: 0; min-width: 640px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #999; }
+
+  .risk { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 0 0 18px; }
+  .risk.high { border-color: var(--high); } .risk.medium { border-color: #c99a1a; } .risk.low { border-color: var(--low); }
+  .sev { font-size: .78rem; font-weight: 600; padding: 1px 7px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+  .sev.high { background: var(--high-bg); color: var(--high); }
+  .sev.medium { background: var(--med-bg); color: var(--med); }
+  .sev.low { background: var(--low-bg); color: var(--low); }
+  .sev.none { background: var(--none-bg); color: var(--muted); }
+
+  ol.steps { padding-left: 1.4em; } ol.steps li { margin-bottom: 8px; max-width: 72ch; }
+  ul.parts { list-style: none; padding: 0; } ul.parts li { margin-bottom: 8px; }
+
+  details { border-top: 1px solid var(--line); padding: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: .85em; word-break: break-word; }
+
+  .callout { background: var(--wash); padding: 12px 16px; margin: 16px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+  footer p { max-width: none; }
+
+  @media (max-width: 600px) { main { padding: 24px 16px 48px; } .scale-num { font-size: 2.6rem; } }
+  @media print { body { background: none; } main { padding: 0; } details { display: block; } .diagram { overflow: visible; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>wf2_cases_by_member.yxmd</h1>
+  <p class="sub">Redshift migration assessment, generated October 01, 2026</p>
+
+  <section class="scale" aria-label="Difficulty score 4 out of 10">
+    <div class="scale-head">
+      <div class="scale-num">4<span>/10</span></div>
+      <div class="scale-band">A few rewrites</div>
+    </div>
+    <div class="segments">
+      <div class="seg on low"></div><div class="seg on low"></div><div class="seg on low"></div><div class="seg on low"></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div><div class="seg "></div>
+    </div>
+    <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+    <p class="facts">6 tools, 7 difficulty points:
+      0 high, 1 medium, 5 low.
+      10 migration gotchas found.</p>
+  </section>
+
+  
+
+  <h2>In short</h2>
+  
+    <p class="summary">This workflow joins a members file and a cases file on member_id, calculates how long each case has been open and an age band for the member, then summarizes case counts and average open-days by member, program, and age band. It scores 4/10, meaning most of it translates directly but a few parts need rewriting. The main driver is the Formula tool <span class="ref" title="Formula (tool 4)">4</span>, which contains several calculation patterns that behave differently in Redshift.</p>
+    <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
+  
+
+  <h2>How data flows</h2>
+  <div class="diagram"><pre class="mermaid">flowchart LR
+    t1[(&#34;Input Data&lt;br/&gt;members.csv&#34;)]
+    t2[(&#34;Input Data&lt;br/&gt;cases.csv&#34;)]
+    t3[&#34;Join&lt;br/&gt;on member_id&#34;]
+    t4[&#34;Formula&lt;br/&gt;new: days_open, age_band&#34;]
+    t5[&#34;Summarize&lt;br/&gt;by member_id, program, age_band; Count …&#34;]
+    t6[(&#34;Output Data&lt;br/&gt;wf2_cases_by_member.csv&#34;)]
+    t1 --&gt;|left| t3
+    t2 --&gt;|right| t3
+    t3 --&gt;|matched| t4
+    t4 --&gt; t5
+    t5 --&gt; t6
+    classDef high fill:#f8d7da,stroke:#b02a37,color:#3d0a10
+    classDef medium fill:#fff3cd,stroke:#b8860b,color:#3d2e00
+    class t4 medium
+    classDef low fill:#d1e7dd,stroke:#2e7d4f,color:#0b2e1c
+    class t1,t2,t3,t5,t6 low
+    classDef none fill:#e9ecef,stroke:#6c757d,color:#212529</pre></div>
+  <div class="legend">
+    <span><i style="background:#f8d7da"></i>High difficulty</span>
+    <span><i style="background:#fff3cd"></i>Medium</span>
+    <span><i style="background:#d1e7dd"></i>Low</span>
+    <span><i style="background:#e9ecef"></i>Nothing to migrate</span>
+  </div>
+
+  
+  <h2>Main risks</h2>
+  
+    <div class="risk high">
+      <h3>Average on whole-number field loses decimals<span class="sev high">high</span></h3>
+      <p>The Summarize tool <span class="ref" title="Summarize (tool 5)">5</span> averages days_open, which is a whole-number (integer) field. Redshift&#39;s AVG on integers returns an integer, dropping any decimal places, so the result will look less precise than the original.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Date calculation differences<span class="sev medium">medium</span></h3>
+      <p>The Formula tool <span class="ref" title="Formula (tool 4)">4</span> uses DateTimeDiff with arguments in the opposite order to Redshift&#39;s DATEDIFF, uses today&#39;s date (so output changes daily), and uses IsEmpty, which treats NULL and empty text the same way while SQL does not. Each of these needs careful rewriting to match the original logic exactly.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Hardcoded year and text-to-number conversion<span class="sev medium">medium</span></h3>
+      <p>The age band formula in <span class="ref" title="Formula (tool 4)">4</span> hardcodes the year 2026, so results will go stale, and converts birth_year from text to a number; in Redshift an invalid value here would fail the whole query instead of just that record.</p>
+    </div>
+  
+    <div class="risk low">
+      <h3>Formula syntax and untyped source files<span class="sev low">low</span></h3>
+      <p>IIF in the Formula tool <span class="ref" title="Formula (tool 4)">4</span> has no direct Redshift equivalent and must become CASE WHEN; the CSV inputs <span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> have no column types, so types must be explicitly defined when loading into Redshift.</p>
+    </div>
+  
+
+  <h2>Next steps</h2>
+  <ol class="steps"><li>Rewrite the Formula tool <span class="ref" title="Formula (tool 4)">4</span> logic as CASE WHEN statements, matching DATEDIFF argument order (unit, start, end) and checking the sign of results.</li><li>Cast days_open to DECIMAL or FLOAT before applying AVG in the Summarize step <span class="ref" title="Summarize (tool 5)">5</span>.</li><li>Replace the hardcoded year 2026 in <span class="ref" title="Formula (tool 4)">4</span> with a dynamic value (e.g. EXTRACT(YEAR FROM CURRENT_DATE)) or a parameter.</li><li>Confirm whether close_date can be NULL, empty text, or both, and adjust the empty-check logic in <span class="ref" title="Formula (tool 4)">4</span> accordingly.</li><li>Define explicit column data types when loading members.csv and cases.csv <span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> via COPY into Redshift.</li><li>Test birth_year conversion in <span class="ref" title="Formula (tool 4)">4</span> for any non-numeric values before casting, since invalid data will fail the query in Redshift.</li></ol>
+
+  <h2>What the workflow does</h2>
+  <ul class="parts">
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> Load member and case data from CSV files, which have no built-in data types.</li>
+    <li><span class="ref" title="Join (tool 3)">3</span> Join members to cases on member_id.</li>
+    <li><span class="ref" title="Formula (tool 4)">4</span> Calculate days a case has been open and classify members into an age band (Senior/Adult).</li>
+    <li><span class="ref" title="Summarize (tool 5)">5</span> Group results by member, program, and age band, counting cases and averaging days open.</li>
+    <li><span class="ref" title="Output Data (tool 6)">6</span> Write the summarized output to a file.</li>
+  </ul>
+  
+
+  <h2>Details</h2>
+  <details>
+    <summary>Every tool and its Redshift equivalent (6)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>What it does</th><th>Difficulty</th><th>In Redshift</th></tr>
+      
+      <tr><td>Input Data <span class="ref">1</span></td><td>members.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Input Data <span class="ref">2</span></td><td>cases.csv</td>
+          <td><span class="sev low">low</span></td><td>Table loaded via COPY from S3 (or an existing table)</td></tr>
+      
+      <tr><td>Join <span class="ref">3</span></td><td>on member_id</td>
+          <td><span class="sev low">low</span></td><td>INNER / LEFT JOIN</td></tr>
+      
+      <tr><td>Formula <span class="ref">4</span></td><td>new: days_open, age_band</td>
+          <td><span class="sev medium">medium</span></td><td>Calculated columns (CASE, DATEDIFF, CAST, ...)</td></tr>
+      
+      <tr><td>Summarize <span class="ref">5</span></td><td>by member_id, program, age_band; Count case_id; Avg days_open</td>
+          <td><span class="sev low">low</span></td><td>GROUP BY with aggregates</td></tr>
+      
+      <tr><td>Output Data <span class="ref">6</span></td><td>wf2_cases_by_member.csv</td>
+          <td><span class="sev low">low</span></td><td>CREATE TABLE AS, INSERT INTO, or UNLOAD to S3</td></tr>
+      
+    </table></div>
+  </details>
+  <details>
+    <summary>Every gotcha found (8 kinds, 10 in total)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Issue</th><th>Tools</th><th>Evidence</th><th>What to do in Redshift</th></tr>
+      
+      <tr><td><span class="sev high">high</span><br>Averages a whole-number field. Redshift&#39;s AVG on integers returns an integer, dropping the decimals.</td>
+          <td><span class="ref">5</span></td>
+          <td><code>Avg of days_open (Int32)</code><br></td>
+          <td>CAST the field to DECIMAL (or FLOAT) before AVG.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>DateTimeDiff(end, start, unit) puts the dates in the opposite order to Redshift.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],&#34;days&#34;),DateTimeDiff([close_date],[open_date],&#34;days&#34;))</code><br></td>
+          <td>DATEDIFF(unit, start, end). Check the sign of the result.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Uses today&#39;s date, so results change every day.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],&#34;days&#34;),DateTimeDiff([close_date],[open_date],&#34;days&#34;))</code><br></td>
+          <td>CURRENT_DATE or GETDATE(). Pin a fixed date when comparing old and new outputs.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>A year is typed directly into the formula, so results go stale as time passes.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(2026- ToNumber([birth_year]) &gt;= 65, &#34;Senior&#34;, &#34;Adult&#34;)</code><br></td>
+          <td>Derive it from the data or the current date (e.g. EXTRACT(YEAR FROM CURRENT_DATE)), or make it a parameter.</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>IsEmpty is true for both NULL and empty text; SQL treats these separately.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],&#34;days&#34;),DateTimeDiff([close_date],[open_date],&#34;days&#34;))</code><br></td>
+          <td>(x IS NULL OR x = &#39;&#39;), or COALESCE(NULLIF(x, &#39;&#39;), ...).</td></tr>
+      
+      <tr><td><span class="sev medium">medium</span><br>Converts text to numbers. A value that isn&#39;t a valid number can behave differently.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(2026- ToNumber([birth_year]) &gt;= 65, &#34;Senior&#34;, &#34;Adult&#34;)</code><br></td>
+          <td>CAST(x AS DECIMAL(...)). In Redshift, invalid text makes the whole query fail.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>Reads a CSV file, which carries no data types.</td>
+          <td><span class="ref">1</span><span class="ref">2</span></td>
+          <td><code>members.csv</code><br><code>cases.csv</code><br></td>
+          <td>Load with COPY into a table whose column types are defined explicitly.</td></tr>
+      
+      <tr><td><span class="sev low">low</span><br>IIF has no Redshift equivalent.</td>
+          <td><span class="ref">4</span></td>
+          <td><code>IIF(IsEmpty([close_date]), DateTimeDiff(DateTimeToday(),[open_date],&#34;days&#34;),DateTimeDiff([close_date],[open_date],&#34;days&#34;))</code><br><code>IIF(2026- ToNumber([birth_year]) &gt;= 65, &#34;Senior&#34;, &#34;Adult&#34;)</code><br></td>
+          <td>Rewrite as CASE WHEN ... THEN ... ELSE ... END.</td></tr>
+      
+    </table></div>
+  </details>
+
+  <footer>
+    <p>How this report was made: code read the workflow file, scored each tool against editable rules (tool_rules.yaml), and checked formulas and settings for known migration issues (formula_gotchas.yaml). The AI only explains those facts. The score is the rules' output, not the AI's opinion.</p>
+    <p>Limits: the analyzer reads workflow logic, not data. Data-dependent issues, such as a date format that doesn't match the actual data, are flagged as risks to test rather than detected directly. Effort and cost aren't estimated.</p>
+  </footer>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontFamily: "IBM Plex Sans, Segoe UI, sans-serif", lineColor: "#5b6577", edgeLabelBackground: "#f3f5f8" } });
+</script>
+</body>
+</html>
