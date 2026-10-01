@@ -102,7 +102,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This workflow calculates claim savings by joining claims, benchmarks, and case data, computing a running savings total per member, flagging top savers, and summarizing by program into four output files. It scores 9/10, the highest difficulty band, mainly because it uses a Python tool <span class="ref" title="Python (tool 13)">13</span> with no SQL equivalent and calls an external macro <span class="ref" title="Macro (tool 16)">16</span> whose logic must be assessed separately. Several other pieces (RegEx <span class="ref" title="RegEx (tool 3)">3</span>, Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span>) also require rewriting as different SQL constructs.</p>
+    <p class="summary">This workflow builds a savings report by joining claims, benchmark, and case data, calculating a running savings total per member, parsing a note field, running a custom Python calculation, and producing a program-level summary through a separate macro. It scores 9/10, the highest difficulty band, mainly because of the Python tool <span class="ref" title="Python (tool 13)">13</span> (no SQL equivalent) and the Macro <span class="ref" title="Macro (tool 16)">16</span> (logic lives in a separate file that must be migrated independently). RegEx <span class="ref" title="RegEx (tool 3)">3</span> and Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span> add further rework because their logic needs different techniques in Redshift. Four separate output files also mean four separate SQL outputs to build and validate.</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -160,46 +160,46 @@
   <h2>Main risks</h2>
   
     <div class="risk high">
-      <h3>Python tool has no Redshift equivalent<span class="sev high">high</span></h3>
-      <p>The Python step <span class="ref" title="Python (tool 13)">13</span> computes a &#39;top_saver&#39; flag using a statistical quantile calculation; Redshift has no built-in Python execution (and Python UDFs are being discontinued), so this logic must be rewritten in SQL (e.g. using PERCENTILE_CONT) or run outside Redshift.</p>
+      <h3>Python logic has no SQL equivalent<span class="sev high">high</span></h3>
+      <p>The Python tool <span class="ref" title="Python (tool 13)">13</span> computes a &#39;top saver&#39; flag using a statistical percentile (quantile). Redshift has no Python UDF support after June 2026, so this logic must be rewritten in SQL (e.g. using PERCENTILE_CONT) or run outside Redshift.</p>
     </div>
   
     <div class="risk high">
-      <h3>Macro logic is in a separate file<span class="sev high">high</span></h3>
-      <p>The Macro <span class="ref" title="Macro (tool 16)">16</span> (wf4_program_summary.yxmc) contains logic not visible in this workflow file; it must be opened and assessed on its own before the program summary step can be migrated.</p>
+      <h3>Macro logic not visible in this file<span class="sev high">high</span></h3>
+      <p>The Macro <span class="ref" title="Macro (tool 16)">16</span> calls a separate file (wf4_program_summary.yxmc) whose internal logic is not included in these facts. It must be assessed and migrated on its own before the full workflow&#39;s difficulty is known.</p>
+    </div>
+  
+    <div class="risk medium">
+      <h3>Running total needs a window function with explicit frame<span class="sev medium">medium</span></h3>
+      <p>The Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span> builds a running total row-by-row, which translates to a SQL window function (SUM OVER). Redshift requires an explicit frame clause (e.g. ROWS UNBOUNDED PRECEDING) when ORDER BY is used, or results will differ.</p>
     </div>
   
     <div class="risk medium">
       <h3>Unmatched join records used downstream<span class="sev medium">medium</span></h3>
-      <p>The Join <span class="ref" title="Join (tool 6)">6</span> passes its unmatched (left) output to a separate output file; this needs a dedicated LEFT JOIN ... WHERE right_key IS NULL query rather than a single join.</p>
+      <p>The Join <span class="ref" title="Join (tool 6)">6</span> passes its unmatched (non-joining) records to a separate output. This must be rebuilt as a distinct LEFT JOIN ... WHERE ... IS NULL query, since Redshift doesn&#39;t have a built-in &#39;unmatched&#39; output like Alteryx.</p>
     </div>
   
     <div class="risk medium">
-      <h3>RegEx translation differences<span class="sev medium">medium</span></h3>
-      <p>The RegEx tool <span class="ref" title="RegEx (tool 3)">3</span> is case-insensitive, extracts a capture group, and uses Perl-style patterns; Redshift&#39;s REGEXP_SUBSTR is case-sensitive and POSIX-based by default, so the &#39;i&#39;, &#39;e&#39;, and &#39;p&#39; parameters must be added and the result verified.</p>
+      <h3>RegEx behavior differs between Alteryx and Redshift<span class="sev medium">medium</span></h3>
+      <p>The RegEx tool <span class="ref" title="RegEx (tool 3)">3</span> is case-insensitive and extracts a capture group, but Redshift&#39;s REGEXP_SUBSTR is case-sensitive by default and returns the whole match unless extra parameters (&#39;i&#39;, &#39;e&#39;) are added. Redshift also defaults to POSIX regex syntax, not Perl-style, so the pattern may need rewriting.</p>
     </div>
   
     <div class="risk medium">
-      <h3>Running total needs window function with explicit frame<span class="sev medium">medium</span></h3>
-      <p>The Multi-Row Formula <span class="ref" title="Multi-Row Formula (tool 12)">12</span> builds a running total by referencing the prior row; in Redshift this becomes a SUM() OVER (...) window function, which requires an explicit frame clause to behave the same way.</p>
-    </div>
-  
-    <div class="risk medium">
-      <h3>Text-to-number conversion may fail on bad data<span class="sev medium">medium</span></h3>
-      <p>Currency text (e.g. &#39;$&#39;, commas) is stripped before converting to numbers <span class="ref" title="Formula (tool 2)">2</span>, and another conversion happens in <span class="ref" title="Formula (tool 8)">8</span>; in Redshift, any value that isn&#39;t a valid number after cleaning will cause the whole query to fail, unlike Alteryx&#39;s more tolerant handling.</p>
+      <h3>Currency text-to-number conversion is fragile<span class="sev medium">medium</span></h3>
+      <p>Formulas <span class="ref" title="Formula (tool 2)">2</span> and <span class="ref" title="Formula (tool 8)">8</span> strip currency symbols and commas before converting text to numbers. In Redshift, any value that doesn&#39;t match the expected format will fail the entire query rather than just that row, so all formats in the real data must be accounted for.</p>
     </div>
   
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Open and analyze the macro file wf4_program_summary.yxmc separately, since its logic is not in this workflow.</li><li>Decide how to replace the Python top_saver calculation <span class="ref" title="Python (tool 13)">13</span> in SQL (e.g. PERCENTILE_CONT) or plan to run it outside Redshift.</li><li>Test the RegEx pattern <span class="ref" title="RegEx (tool 3)">3</span> in Redshift with the &#39;i&#39;, &#39;e&#39;, and &#39;p&#39; parameters to confirm it matches Alteryx&#39;s output.</li><li>Rewrite the running savings calculation <span class="ref" title="Multi-Row Formula (tool 12)">12</span> as a window function with an explicit frame clause and validate results row by row.</li><li>Audit the allowed_amount and benchmark_cost fields for all currency formats to ensure cleaning logic [2, 8] covers every case before casting.</li><li>Build the unmatched-claims query <span class="ref" title="Join (tool 6)">6</span> as a separate LEFT JOIN ... WHERE IS NULL statement and confirm row counts match the original output.</li></ol>
+  <ol class="steps"><li>Obtain and analyze the macro file wf4_program_summary.yxmc separately before finalizing the migration plan.</li><li>Decide how to replace the Python top-saver logic <span class="ref" title="Python (tool 13)">13</span>, e.g. rewrite with a SQL percentile function or run it in an external process.</li><li>Rebuild the running savings calculation <span class="ref" title="Multi-Row Formula (tool 12)">12</span> as a SQL window function with an explicit frame clause.</li><li>Test the regex pattern from <span class="ref" title="RegEx (tool 3)">3</span> in Redshift with the &#39;i&#39; and &#39;e&#39; parameters, and confirm POSIX vs Perl syntax compatibility.</li><li>Recreate the unmatched-join output <span class="ref" title="Join (tool 6)">6</span> as a separate LEFT JOIN query with an IS NULL filter.</li><li>Audit the real claims data for all currency formatting variants to ensure the CAST/REPLACE logic in <span class="ref" title="Formula (tool 2)">2</span> and <span class="ref" title="Formula (tool 8)">8</span> won&#39;t fail on real values.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 5)">5</span><span class="ref" title="Input Data (tool 9)">9</span><span class="ref" title="Join (tool 6)">6</span><span class="ref" title="Join (tool 10)">10</span> Loads claims, benchmarks, and case data from CSV and joins them on procedure code and case ID.</li>
-    <li><span class="ref" title="Formula (tool 2)">2</span><span class="ref" title="RegEx (tool 3)">3</span><span class="ref" title="Formula (tool 8)">8</span> Cleans and converts amount fields, parses a note field with a regular expression, and calculates allowed and savings amounts.</li>
-    <li><span class="ref" title="Sort (tool 11)">11</span><span class="ref" title="Multi-Row Formula (tool 12)">12</span> Sorts records by member and date, then computes a running savings total per member row by row.</li>
-    <li><span class="ref" title="Python (tool 13)">13</span> Runs a Python script that flags claims in the top 10% of savings as &#39;top_saver&#39;.</li>
-    <li><span class="ref" title="Summarize (tool 17)">17</span><span class="ref" title="Macro (tool 16)">16</span><span class="ref" title="Output Data (tool 18)">18</span><span class="ref" title="Output Data (tool 14)">14</span><span class="ref" title="Output Data (tool 15)">15</span><span class="ref" title="Output Data (tool 7)">7</span> Summarizes savings by program via a macro, and writes out four separate result files.</li>
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 5)">5</span><span class="ref" title="Input Data (tool 9)">9</span><span class="ref" title="Formula (tool 2)">2</span><span class="ref" title="RegEx (tool 3)">3</span><span class="ref" title="Join (tool 6)">6</span><span class="ref" title="Formula (tool 8)">8</span><span class="ref" title="Join (tool 10)">10</span> Loads claims, benchmarks, and case files, cleans/converts amount fields, parses a note field, and joins the three sources to calculate an &#39;allowed&#39; and &#39;savings&#39; amount.</li>
+    <li><span class="ref" title="Sort (tool 11)">11</span><span class="ref" title="Multi-Row Formula (tool 12)">12</span> Sorts records by member and service date, then calculates a running savings total per member row by row.</li>
+    <li><span class="ref" title="Python (tool 13)">13</span> Runs Python code that flags claims as &#39;top saver&#39; if their savings amount is above the 90th percentile.</li>
+    <li><span class="ref" title="Macro (tool 16)">16</span><span class="ref" title="Summarize (tool 17)">17</span> Summarizes savings by program using a separate macro file, combined with totals from a Summarize tool [17].</li>
+    <li><span class="ref" title="Output Data (tool 7)">7</span><span class="ref" title="Output Data (tool 14)">14</span><span class="ref" title="Output Data (tool 15)">15</span><span class="ref" title="Output Data (tool 18)">18</span> Writes four separate outputs: unmatched claims, claim savings (CSV and database file), and program summary.</li>
   </ul>
   
 

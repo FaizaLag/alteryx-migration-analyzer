@@ -100,7 +100,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This workflow joins a members file and a cases file on member ID, calculates how long each case has been open and an age band for each member, then summarizes case counts and average days open by member, program, and age band. It scores 4 out of 10, meaning it needs a few targeted rewrites rather than a full redesign. The main driver is the Formula tool <span class="ref" title="Formula (tool 4)">4</span>, which contains several date and number-handling patterns that behave differently in Redshift.</p>
+    <p class="summary">This workflow joins a members file and a cases file on member_id, calculates how long each case has been open and an age band for the member, then summarizes case counts and average open-days by member, program, and age band. It scores 4/10, meaning most of it translates directly but a few parts need rewriting. The main driver is the Formula tool <span class="ref" title="Formula (tool 4)">4</span>, which contains several calculation patterns that behave differently in Redshift.</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -134,40 +134,36 @@
   <h2>Main risks</h2>
   
     <div class="risk high">
-      <h3>Average of an integer field loses precision<span class="sev high">high</span></h3>
-      <p>days_open is a whole number, and Redshift&#39;s AVG on integers returns an integer, silently dropping decimal places. The field must be cast to DECIMAL or FLOAT before averaging.</p>
+      <h3>Average on whole-number field loses decimals<span class="sev high">high</span></h3>
+      <p>The Summarize tool <span class="ref" title="Summarize (tool 5)">5</span> averages days_open, which is a whole-number (integer) field. Redshift&#39;s AVG on integers returns an integer, dropping any decimal places, so the result will look less precise than the original.</p>
     </div>
   
     <div class="risk medium">
-      <h3>Date logic will behave differently without changes<span class="sev medium">medium</span></h3>
-      <p>The formula uses DateTimeDiff with arguments in the opposite order to Redshift&#39;s DATEDIFF, uses today&#39;s date (DateTimeToday) so results change daily, and uses IsEmpty, which treats NULL and empty text the same way SQL does not. Each of these needs a specific rewrite and could produce wrong or non-reproducible numbers if missed.</p>
+      <h3>Date calculation differences<span class="sev medium">medium</span></h3>
+      <p>The Formula tool <span class="ref" title="Formula (tool 4)">4</span> uses DateTimeDiff with arguments in the opposite order to Redshift&#39;s DATEDIFF, uses today&#39;s date (so output changes daily), and uses IsEmpty, which treats NULL and empty text the same way while SQL does not. Each of these needs careful rewriting to match the original logic exactly.</p>
     </div>
   
     <div class="risk medium">
-      <h3>Hardcoded year and risky text-to-number conversion<span class="sev medium">medium</span></h3>
-      <p>The age_band calculation uses a fixed year (2026) typed into the formula, so it will go stale over time, and converts birth_year text to a number with ToNumber; in Redshift an invalid value here would fail the whole query instead of behaving leniently.</p>
+      <h3>Hardcoded year and text-to-number conversion<span class="sev medium">medium</span></h3>
+      <p>The age band formula in <span class="ref" title="Formula (tool 4)">4</span> hardcodes the year 2026, so results will go stale, and converts birth_year from text to a number; in Redshift an invalid value here would fail the whole query instead of just that record.</p>
     </div>
   
     <div class="risk low">
-      <h3>IIF function has no direct Redshift equivalent<span class="sev low">low</span></h3>
-      <p>Both IIF expressions in the Formula tool <span class="ref" title="Formula (tool 4)">4</span> need to be rewritten as CASE WHEN statements; this is mechanical but must be done carefully to preserve logic.</p>
-    </div>
-  
-    <div class="risk low">
-      <h3>CSV inputs have no defined data types<span class="sev low">low</span></h3>
-      <p>CSV files carry no type information, so column types (e.g., for birth_year, dates) must be explicitly defined when loading into Redshift via COPY.</p>
+      <h3>Formula syntax and untyped source files<span class="sev low">low</span></h3>
+      <p>IIF in the Formula tool <span class="ref" title="Formula (tool 4)">4</span> has no direct Redshift equivalent and must become CASE WHEN; the CSV inputs <span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> have no column types, so types must be explicitly defined when loading into Redshift.</p>
     </div>
   
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Cast days_open to DECIMAL or FLOAT before applying AVG in the Summarize step <span class="ref" title="Summarize (tool 5)">5</span>.</li><li>Rewrite the DateTimeDiff logic in Formula <span class="ref" title="Formula (tool 4)">4</span> as DATEDIFF(unit, start, end), checking the sign of the result.</li><li>Replace DateTimeToday() in Formula <span class="ref" title="Formula (tool 4)">4</span> with CURRENT_DATE or GETDATE(), and decide whether to pin a fixed date for testing against old outputs.</li><li>Replace the hardcoded year (2026) in Formula <span class="ref" title="Formula (tool 4)">4</span> with a dynamic value, such as EXTRACT(YEAR FROM CURRENT_DATE), or a parameter.</li><li>Rewrite both IIF expressions in Formula <span class="ref" title="Formula (tool 4)">4</span> as CASE WHEN statements.</li><li>Define explicit column types when loading members.csv and cases.csv [1, 2] into Redshift, and test the IsEmpty/close_date logic for NULL vs. empty string handling.</li></ol>
+  <ol class="steps"><li>Rewrite the Formula tool <span class="ref" title="Formula (tool 4)">4</span> logic as CASE WHEN statements, matching DATEDIFF argument order (unit, start, end) and checking the sign of results.</li><li>Cast days_open to DECIMAL or FLOAT before applying AVG in the Summarize step <span class="ref" title="Summarize (tool 5)">5</span>.</li><li>Replace the hardcoded year 2026 in <span class="ref" title="Formula (tool 4)">4</span> with a dynamic value (e.g. EXTRACT(YEAR FROM CURRENT_DATE)) or a parameter.</li><li>Confirm whether close_date can be NULL, empty text, or both, and adjust the empty-check logic in <span class="ref" title="Formula (tool 4)">4</span> accordingly.</li><li>Define explicit column data types when loading members.csv and cases.csv <span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> via COPY into Redshift.</li><li>Test birth_year conversion in <span class="ref" title="Formula (tool 4)">4</span> for any non-numeric values before casting, since invalid data will fail the query in Redshift.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span><span class="ref" title="Join (tool 3)">3</span> Loads members and cases data from CSV files and joins them on member_id.</li>
-    <li><span class="ref" title="Formula (tool 4)">4</span> Calculates days_open (handling open vs. closed cases) and assigns an age_band based on birth year.</li>
-    <li><span class="ref" title="Summarize (tool 5)">5</span> Groups results by member_id, program, and age_band, counting cases and averaging days_open.</li>
-    <li><span class="ref" title="Output Data (tool 6)">6</span> Writes the final summarized results to an output file.</li>
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span> Load member and case data from CSV files, which have no built-in data types.</li>
+    <li><span class="ref" title="Join (tool 3)">3</span> Join members to cases on member_id.</li>
+    <li><span class="ref" title="Formula (tool 4)">4</span> Calculate days a case has been open and classify members into an age band (Senior/Adult).</li>
+    <li><span class="ref" title="Summarize (tool 5)">5</span> Group results by member, program, and age band, counting cases and averaging days open.</li>
+    <li><span class="ref" title="Output Data (tool 6)">6</span> Write the summarized output to a file.</li>
   </ul>
   
 

@@ -100,7 +100,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This workflow reads a members CSV file, keeps only active members, renames and drops a couple of columns, then writes the result to an output CSV. It scored 2 out of 10, meaning it is a direct translation to SQL with no complex logic. All four tools are simple, low-difficulty steps with standard SQL equivalents.</p>
+    <p class="summary">This workflow reads a members CSV file, keeps only rows where status is Active, renames and drops a couple of columns, then writes the result to an output CSV. It scores 2 out of 10, meaning it is a direct translation to SQL with no design decisions needed. All four tools are simple, low-difficulty operations that map one-to-one onto standard SQL clauses.</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -130,19 +130,19 @@
   
     <div class="risk low">
       <h3>CSV source has no defined data types<span class="sev low">low</span></h3>
-      <p>A CSV file carries no column type information, so the Redshift table used to load it must have explicit column types defined; otherwise values may be loaded or interpreted incorrectly.</p>
+      <p>The input file is a CSV, which carries no column data types. When loading with COPY into Redshift, column types must be explicitly defined to avoid type mismatches or load errors.</p>
     </div>
   
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Define explicit column data types for the target Redshift table before loading members.csv via COPY.</li><li>Confirm which two columns are dropped in the Select <span class="ref" title="Select (tool 3)">3</span> step to replicate the exact column list in SQL.</li><li>Decide whether the final output should be a Redshift table (CREATE TABLE AS or INSERT INTO) or an UNLOAD to S3.</li><li>Validate the WHERE clause logic for status = Active against the source data to ensure consistent filtering.</li></ol>
+  <ol class="steps"><li>Confirm the target column data types for the members table before writing the COPY/CREATE TABLE statement.</li><li>Translate the Filter <span class="ref" title="Filter (tool 2)">2</span> condition directly into a WHERE clause.</li><li>Translate the Select <span class="ref" title="Select (tool 3)">3</span> renaming and column drop into the SELECT column list.</li><li>Decide whether Output Data <span class="ref" title="Output Data (tool 4)">4</span> should become a CREATE TABLE AS, INSERT INTO, or UNLOAD to S3 based on downstream use.</li><li>Validate row counts and column values against the original CSV output after migration.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="Input Data (tool 1)">1</span> Loads member data from a CSV file.</li>
-    <li><span class="ref" title="Filter (tool 2)">2</span> Filters records to keep only those with status Active, which becomes a WHERE clause.</li>
-    <li><span class="ref" title="Select (tool 3)">3</span> Selects and renames the plan_type column to plan, and drops two other columns.</li>
-    <li><span class="ref" title="Output Data (tool 4)">4</span> Writes the final filtered and selected data to an output file, equivalent to a CREATE TABLE AS or UNLOAD in Redshift.</li>
+    <li><span class="ref" title="Input Data (tool 1)">1</span> Loads member data from a CSV file, which becomes a COPY from S3 or an existing table in Redshift.</li>
+    <li><span class="ref" title="Filter (tool 2)">2</span> Filters rows to only those with status equal to Active, which becomes a WHERE clause.</li>
+    <li><span class="ref" title="Select (tool 3)">3</span> Renames the plan_type column to plan and drops two other columns, which becomes a column list with aliases in the SELECT.</li>
+    <li><span class="ref" title="Output Data (tool 4)">4</span> Writes the final result to a CSV output, which becomes a CREATE TABLE AS, INSERT INTO, or UNLOAD to S3.</li>
   </ul>
   
 

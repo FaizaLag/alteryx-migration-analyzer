@@ -100,7 +100,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This macro filters claims data to the &#39;Care Navigation&#39; program and then summarizes savings and claim counts by program. It scores 1 out of 10, the lowest difficulty band, because both tools used are simple, direct-translation operations. There are no gotchas or structural complications noted in the facts.</p>
+    <p class="summary">This workflow (a macro, which is a reusable Alteryx sub-process) filters records to the &#39;Care Navigation&#39; program, then summarizes the data by summing savings and counting claim IDs. It scores 1 out of 10, meaning it translates directly to SQL with minimal rework. Both tools used - the Filter <span class="ref" title="Filter (tool 3)">3</span> and Summarize <span class="ref" title="Summarize (tool 6)">6</span> - are simple, well-understood operations with clean SQL equivalents.</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -133,19 +133,15 @@
   
   <h2>Main risks</h2>
   
-    <div class="risk low">
-      <h3>Unlabeled upstream/downstream tools<span class="sev low">low</span></h3>
-      <p>The data flow shows tools 2, 4, 5, and 7 feeding into or out of the filter and summarize steps, but the facts don&#39;t describe what these tools do. This can&#39;t be assessed from the workflow file as given.</p>
-    </div>
-  
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Confirm what tools 2, 4, 5, and 7 do, since they are not detailed in the extracted facts but are part of the data flow.</li><li>Translate Filter <span class="ref" title="Filter (tool 3)">3</span> into a WHERE clause for program = &#39;Care Navigation&#39;.</li><li>Translate Summarize <span class="ref" title="Summarize (tool 6)">6</span> into a GROUP BY program with SUM(savings) and COUNT(claim_id).</li><li>Validate the Redshift output against the original macro&#39;s output for a sample of records.</li></ol>
+  <ol class="steps"><li>Confirm the business logic for tools <span class="ref" title="tool (tool 2)">2</span>, <span class="ref" title="tool (tool 4)">4</span>, and <span class="ref" title="tool (tool 5)">5</span> since their function isn&#39;t detailed in these facts.</li><li>Translate the Filter <span class="ref" title="Filter (tool 3)">3</span> to a SQL WHERE clause filtering on program = &#39;Care Navigation&#39;.</li><li>Translate the Summarize <span class="ref" title="Summarize (tool 6)">6</span> to a SQL GROUP BY on program, with SUM(savings) and COUNT(claim_id).</li><li>Verify what tool <span class="ref" title="tool (tool 7)">7</span> does with the summarized output, as it is outside the scope of these facts.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="Filter (tool 3)">3</span> Filter [3] keeps only rows where program equals &#39;Care Navigation&#39;.</li>
-    <li><span class="ref" title="Summarize (tool 6)">6</span> Summarize [6] groups the filtered data by program, summing savings and counting claim_id.</li>
+    <li><span class="ref" title="tool (tool 2)">2</span><span class="ref" title="Filter (tool 3)">3</span><span class="ref" title="tool (tool 4)">4</span><span class="ref" title="tool (tool 5)">5</span> Data flows through several steps into the Filter [3], which keeps only records where program equals &#39;Care Navigation&#39;.</li>
+    <li><span class="ref" title="Summarize (tool 6)">6</span> The Summarize tool [6] groups the filtered data by program, summing savings and counting claim IDs.</li>
+    <li><span class="ref" title="tool (tool 7)">7</span> The summarized result is passed downstream to tool [7].</li>
   </ul>
   
 

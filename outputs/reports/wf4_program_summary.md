@@ -4,7 +4,7 @@
 
 ## In short
 
-This macro filters claims data to the 'Care Navigation' program and then summarizes savings and claim counts by program. It scores 1 out of 10, the lowest difficulty band, because both tools used are simple, direct-translation operations. There are no gotchas or structural complications noted in the facts.
+This workflow (a macro, which is a reusable Alteryx sub-process) filters records to the 'Care Navigation' program, then summarizes the data by summing savings and counting claim IDs. It scores 1 out of 10, meaning it translates directly to SQL with minimal rework. Both tools used - the Filter [3] and Summarize [6] - are simple, well-understood operations with clean SQL equivalents.
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -33,15 +33,12 @@ flowchart LR
 
 ## Main risks
 
-**Unlabeled upstream/downstream tools** (low)  
-The data flow shows tools 2, 4, 5, and 7 feeding into or out of the filter and summarize steps, but the facts don't describe what these tools do. This can't be assessed from the workflow file as given.
-
 ## Next steps
 
-1. Confirm what tools 2, 4, 5, and 7 do, since they are not detailed in the extracted facts but are part of the data flow.
-2. Translate Filter [3] into a WHERE clause for program = 'Care Navigation'.
-3. Translate Summarize [6] into a GROUP BY program with SUM(savings) and COUNT(claim_id).
-4. Validate the Redshift output against the original macro's output for a sample of records.
+1. Confirm the business logic for tools [2], [4], and [5] since their function isn't detailed in these facts.
+2. Translate the Filter [3] to a SQL WHERE clause filtering on program = 'Care Navigation'.
+3. Translate the Summarize [6] to a SQL GROUP BY on program, with SUM(savings) and COUNT(claim_id).
+4. Verify what tool [7] does with the summarized output, as it is outside the scope of these facts.
 
 ## Every gotcha found
 

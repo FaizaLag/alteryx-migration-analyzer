@@ -4,7 +4,7 @@
 
 ## In short
 
-This workflow combines three months of case data, cleans and deduplicates it, then summarizes case counts by month and program for a trend report. It scores 6/10, meaning the migration needs real design decisions rather than a direct rewrite. The main drivers are a Union [5] that matches columns by name, a Formula [6] with multiple date formats and mixed logic, and a Unique [7] step whose result depends on row order.
+This workflow reads three monthly case-extract CSV files, stacks them into one dataset, builds several calculated fields (including parsed dates and cleaned text), removes duplicate cases, then summarizes case counts by month and program for a trend report. It scores 6/10, meaning it needs real design decisions rather than a direct line-by-line translation. The main reasons are the Union [5], Formula [6], and Unique [7] tools, which all involve logic that Alteryx and SQL handle differently.
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -41,32 +41,32 @@ flowchart LR
 
 ## Main risks
 
-**Unique keeps 'first' row, but SQL has no inherent row order** (high)  
-Unique [7] keeps the first row per case ID based on the order Alteryx processes rows, which SQL does not guarantee. Without an explicit ORDER BY in a ROW_NUMBER() rewrite, Redshift could keep a different row, changing which case details survive.
+**Date parsing logic depends on mixed formats in source data** (high)  
+Formula [6] picks a date format based on separators and string length (e.g. '/' vs length 11), which implies the source open_date column itself has inconsistent formats. Alteryx's date parsing is more forgiving than Redshift's TO_DATE, so each format needs to be tested explicitly or rows may fail or parse incorrectly.
 
-**Mixed date formats in one field** (high)  
-The open_date field contains at least three different date formats (e.g. slashes, dashes with month names, year-first), handled in Alteryx with nested conditions. Redshift's date functions are stricter about format, so each format must be tested separately to avoid silent parsing errors or nulls.
+**Deduplication result depends on row order** (high)  
+Unique [7] keeps the first row per case_id, but 'first' depends on the order rows arrive in Alteryx, which SQL does not guarantee. Without an explicit ORDER BY in a ROW_NUMBER() rewrite, Redshift could keep a different row than Alteryx did, changing results.
 
-**Union relies on matching column names, not position** (medium)  
-Union [5] combines sources by matching column names, and one source renames a column beforehand [4]. Redshift's UNION ALL matches by column position, so columns must be listed in the same order in every SELECT or data will land in the wrong column.
+**Union relies on column names, not position** (medium)  
+Union [5] is set to match columns by name (ByName), and a column is renamed (program_name to program) in Select [4] right before the union, implying the three input files don't use identical column names. UNION ALL in Redshift matches by position, so columns must be renamed and ordered identically in every SELECT or data will be misaligned.
 
-**Blank vs. NULL handling in member ID** (medium)  
-The Formula [6] treats empty text and NULL member IDs the same way, but SQL distinguishes them. The rewrite needs to explicitly check for both cases or some 'UNKNOWN' labels could be missed.
+**Empty string vs NULL handling may change** (medium)  
+Formula [6] treats empty text and NULL the same way for member_id (IsEmpty), but standard SQL distinguishes NULL from an empty string. This needs an explicit check for both cases to avoid missing 'UNKNOWN' labels after migration.
 
-**Text case normalization may differ** (low)  
-Status text is capitalized using TitleCase; Redshift's INITCAP can produce different results for certain words (e.g. hyphenated or apostrophe-containing text), so output should be spot-checked.
+**Minor function rewrites needed** (low)  
+Formula [6] uses IIF, TitleCase, and date formatting functions that have no direct Redshift equivalent (CASE WHEN, INITCAP, TO_CHAR). These are mechanical rewrites but INITCAP can produce different capitalization results than TitleCase, so output should be spot-checked.
 
-**CSV inputs carry no data types** (low)  
-Source files are plain CSVs with no enforced column types, so the Redshift table definition must explicitly set correct types during COPY load.
+**CSV inputs have no enforced data types** (low)  
+The three source files are plain CSVs with no built-in column types, so target table types must be defined explicitly when loading with COPY.
 
 ## Next steps
 
-1. Confirm the exact set of date formats present in open_date across all three months before writing the TO_DATE logic.
-2. Define the ORDER BY rule that determines which row should be kept as 'first' when deduplicating case_id in the ROW_NUMBER() rewrite.
-3. Align column order and names across all three input sources before converting the Union to UNION ALL.
-4. Decide whether empty-string and NULL member_id values should both map to 'UNKNOWN' and encode that explicitly.
-5. Spot-check INITCAP output against the original TitleCase results for status values.
-6. Define target table schema and data types for the Redshift COPY load of the CSV inputs.
+1. Document every date format present in the open_date column and write explicit TO_DATE logic for each.
+2. Define an explicit ORDER BY to replicate the 'keep first row' behavior of Unique [7] using ROW_NUMBER().
+3. Align column names and order across all three input sources before writing the UNION ALL that replaces Union [5].
+4. Decide whether member_id should treat empty strings and NULLs the same, and encode that explicitly.
+5. Spot-check INITCAP output against the original TitleCase results for the status field.
+6. Define explicit column data types for the Redshift tables that will receive the COPY-loaded CSV data.
 
 ## Every gotcha found
 

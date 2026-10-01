@@ -6,7 +6,7 @@
 
 ## In short
 
-This workflow calculates claim savings by joining claims, benchmarks, and case data, computing a running savings total per member, flagging top savers, and summarizing by program into four output files. It scores 9/10, the highest difficulty band, mainly because it uses a Python tool [13] with no SQL equivalent and calls an external macro [16] whose logic must be assessed separately. Several other pieces (RegEx [3], Multi-Row Formula [12]) also require rewriting as different SQL constructs.
+This workflow builds a savings report by joining claims, benchmark, and case data, calculating a running savings total per member, parsing a note field, running a custom Python calculation, and producing a program-level summary through a separate macro. It scores 9/10, the highest difficulty band, mainly because of the Python tool [13] (no SQL equivalent) and the Macro [16] (logic lives in a separate file that must be migrated independently). RegEx [3] and Multi-Row Formula [12] add further rework because their logic needs different techniques in Redshift. Four separate output files also mean four separate SQL outputs to build and validate.
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -59,32 +59,32 @@ flowchart TB
 
 ## Main risks
 
-**Python tool has no Redshift equivalent** (high)  
-The Python step [13] computes a 'top_saver' flag using a statistical quantile calculation; Redshift has no built-in Python execution (and Python UDFs are being discontinued), so this logic must be rewritten in SQL (e.g. using PERCENTILE_CONT) or run outside Redshift.
+**Python logic has no SQL equivalent** (high)  
+The Python tool [13] computes a 'top saver' flag using a statistical percentile (quantile). Redshift has no Python UDF support after June 2026, so this logic must be rewritten in SQL (e.g. using PERCENTILE_CONT) or run outside Redshift.
 
-**Macro logic is in a separate file** (high)  
-The Macro [16] (wf4_program_summary.yxmc) contains logic not visible in this workflow file; it must be opened and assessed on its own before the program summary step can be migrated.
+**Macro logic not visible in this file** (high)  
+The Macro [16] calls a separate file (wf4_program_summary.yxmc) whose internal logic is not included in these facts. It must be assessed and migrated on its own before the full workflow's difficulty is known.
+
+**Running total needs a window function with explicit frame** (medium)  
+The Multi-Row Formula [12] builds a running total row-by-row, which translates to a SQL window function (SUM OVER). Redshift requires an explicit frame clause (e.g. ROWS UNBOUNDED PRECEDING) when ORDER BY is used, or results will differ.
 
 **Unmatched join records used downstream** (medium)  
-The Join [6] passes its unmatched (left) output to a separate output file; this needs a dedicated LEFT JOIN ... WHERE right_key IS NULL query rather than a single join.
+The Join [6] passes its unmatched (non-joining) records to a separate output. This must be rebuilt as a distinct LEFT JOIN ... WHERE ... IS NULL query, since Redshift doesn't have a built-in 'unmatched' output like Alteryx.
 
-**RegEx translation differences** (medium)  
-The RegEx tool [3] is case-insensitive, extracts a capture group, and uses Perl-style patterns; Redshift's REGEXP_SUBSTR is case-sensitive and POSIX-based by default, so the 'i', 'e', and 'p' parameters must be added and the result verified.
+**RegEx behavior differs between Alteryx and Redshift** (medium)  
+The RegEx tool [3] is case-insensitive and extracts a capture group, but Redshift's REGEXP_SUBSTR is case-sensitive by default and returns the whole match unless extra parameters ('i', 'e') are added. Redshift also defaults to POSIX regex syntax, not Perl-style, so the pattern may need rewriting.
 
-**Running total needs window function with explicit frame** (medium)  
-The Multi-Row Formula [12] builds a running total by referencing the prior row; in Redshift this becomes a SUM() OVER (...) window function, which requires an explicit frame clause to behave the same way.
-
-**Text-to-number conversion may fail on bad data** (medium)  
-Currency text (e.g. '$', commas) is stripped before converting to numbers [2], and another conversion happens in [8]; in Redshift, any value that isn't a valid number after cleaning will cause the whole query to fail, unlike Alteryx's more tolerant handling.
+**Currency text-to-number conversion is fragile** (medium)  
+Formulas [2] and [8] strip currency symbols and commas before converting text to numbers. In Redshift, any value that doesn't match the expected format will fail the entire query rather than just that row, so all formats in the real data must be accounted for.
 
 ## Next steps
 
-1. Open and analyze the macro file wf4_program_summary.yxmc separately, since its logic is not in this workflow.
-2. Decide how to replace the Python top_saver calculation [13] in SQL (e.g. PERCENTILE_CONT) or plan to run it outside Redshift.
-3. Test the RegEx pattern [3] in Redshift with the 'i', 'e', and 'p' parameters to confirm it matches Alteryx's output.
-4. Rewrite the running savings calculation [12] as a window function with an explicit frame clause and validate results row by row.
-5. Audit the allowed_amount and benchmark_cost fields for all currency formats to ensure cleaning logic [2, 8] covers every case before casting.
-6. Build the unmatched-claims query [6] as a separate LEFT JOIN ... WHERE IS NULL statement and confirm row counts match the original output.
+1. Obtain and analyze the macro file wf4_program_summary.yxmc separately before finalizing the migration plan.
+2. Decide how to replace the Python top-saver logic [13], e.g. rewrite with a SQL percentile function or run it in an external process.
+3. Rebuild the running savings calculation [12] as a SQL window function with an explicit frame clause.
+4. Test the regex pattern from [3] in Redshift with the 'i' and 'e' parameters, and confirm POSIX vs Perl syntax compatibility.
+5. Recreate the unmatched-join output [6] as a separate LEFT JOIN query with an IS NULL filter.
+6. Audit the real claims data for all currency formatting variants to ensure the CAST/REPLACE logic in [2] and [8] won't fail on real values.
 
 ## Every gotcha found
 

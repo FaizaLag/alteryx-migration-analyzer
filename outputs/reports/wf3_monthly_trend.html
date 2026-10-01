@@ -100,7 +100,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This workflow combines three months of case data, cleans and deduplicates it, then summarizes case counts by month and program for a trend report. It scores 6/10, meaning the migration needs real design decisions rather than a direct rewrite. The main drivers are a Union <span class="ref" title="Union (tool 5)">5</span> that matches columns by name, a Formula <span class="ref" title="Formula (tool 6)">6</span> with multiple date formats and mixed logic, and a Unique <span class="ref" title="Unique (tool 7)">7</span> step whose result depends on row order.</p>
+    <p class="summary">This workflow reads three monthly case-extract CSV files, stacks them into one dataset, builds several calculated fields (including parsed dates and cleaned text), removes duplicate cases, then summarizes case counts by month and program for a trend report. It scores 6/10, meaning it needs real design decisions rather than a direct line-by-line translation. The main reasons are the Union <span class="ref" title="Union (tool 5)">5</span>, Formula <span class="ref" title="Formula (tool 6)">6</span>, and Unique <span class="ref" title="Unique (tool 7)">7</span> tools, which all involve logic that Alteryx and SQL handle differently.</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -142,45 +142,45 @@
   <h2>Main risks</h2>
   
     <div class="risk high">
-      <h3>Unique keeps &#39;first&#39; row, but SQL has no inherent row order<span class="sev high">high</span></h3>
-      <p>Unique <span class="ref" title="Unique (tool 7)">7</span> keeps the first row per case ID based on the order Alteryx processes rows, which SQL does not guarantee. Without an explicit ORDER BY in a ROW_NUMBER() rewrite, Redshift could keep a different row, changing which case details survive.</p>
+      <h3>Date parsing logic depends on mixed formats in source data<span class="sev high">high</span></h3>
+      <p>Formula <span class="ref" title="Formula (tool 6)">6</span> picks a date format based on separators and string length (e.g. &#39;/&#39; vs length 11), which implies the source open_date column itself has inconsistent formats. Alteryx&#39;s date parsing is more forgiving than Redshift&#39;s TO_DATE, so each format needs to be tested explicitly or rows may fail or parse incorrectly.</p>
     </div>
   
     <div class="risk high">
-      <h3>Mixed date formats in one field<span class="sev high">high</span></h3>
-      <p>The open_date field contains at least three different date formats (e.g. slashes, dashes with month names, year-first), handled in Alteryx with nested conditions. Redshift&#39;s date functions are stricter about format, so each format must be tested separately to avoid silent parsing errors or nulls.</p>
+      <h3>Deduplication result depends on row order<span class="sev high">high</span></h3>
+      <p>Unique <span class="ref" title="Unique (tool 7)">7</span> keeps the first row per case_id, but &#39;first&#39; depends on the order rows arrive in Alteryx, which SQL does not guarantee. Without an explicit ORDER BY in a ROW_NUMBER() rewrite, Redshift could keep a different row than Alteryx did, changing results.</p>
     </div>
   
     <div class="risk medium">
-      <h3>Union relies on matching column names, not position<span class="sev medium">medium</span></h3>
-      <p>Union <span class="ref" title="Union (tool 5)">5</span> combines sources by matching column names, and one source renames a column beforehand <span class="ref" title="Select (tool 4)">4</span>. Redshift&#39;s UNION ALL matches by column position, so columns must be listed in the same order in every SELECT or data will land in the wrong column.</p>
+      <h3>Union relies on column names, not position<span class="sev medium">medium</span></h3>
+      <p>Union <span class="ref" title="Union (tool 5)">5</span> is set to match columns by name (ByName), and a column is renamed (program_name to program) in Select <span class="ref" title="Select (tool 4)">4</span> right before the union, implying the three input files don&#39;t use identical column names. UNION ALL in Redshift matches by position, so columns must be renamed and ordered identically in every SELECT or data will be misaligned.</p>
     </div>
   
     <div class="risk medium">
-      <h3>Blank vs. NULL handling in member ID<span class="sev medium">medium</span></h3>
-      <p>The Formula <span class="ref" title="Formula (tool 6)">6</span> treats empty text and NULL member IDs the same way, but SQL distinguishes them. The rewrite needs to explicitly check for both cases or some &#39;UNKNOWN&#39; labels could be missed.</p>
+      <h3>Empty string vs NULL handling may change<span class="sev medium">medium</span></h3>
+      <p>Formula <span class="ref" title="Formula (tool 6)">6</span> treats empty text and NULL the same way for member_id (IsEmpty), but standard SQL distinguishes NULL from an empty string. This needs an explicit check for both cases to avoid missing &#39;UNKNOWN&#39; labels after migration.</p>
     </div>
   
     <div class="risk low">
-      <h3>Text case normalization may differ<span class="sev low">low</span></h3>
-      <p>Status text is capitalized using TitleCase; Redshift&#39;s INITCAP can produce different results for certain words (e.g. hyphenated or apostrophe-containing text), so output should be spot-checked.</p>
+      <h3>Minor function rewrites needed<span class="sev low">low</span></h3>
+      <p>Formula <span class="ref" title="Formula (tool 6)">6</span> uses IIF, TitleCase, and date formatting functions that have no direct Redshift equivalent (CASE WHEN, INITCAP, TO_CHAR). These are mechanical rewrites but INITCAP can produce different capitalization results than TitleCase, so output should be spot-checked.</p>
     </div>
   
     <div class="risk low">
-      <h3>CSV inputs carry no data types<span class="sev low">low</span></h3>
-      <p>Source files are plain CSVs with no enforced column types, so the Redshift table definition must explicitly set correct types during COPY load.</p>
+      <h3>CSV inputs have no enforced data types<span class="sev low">low</span></h3>
+      <p>The three source files are plain CSVs with no built-in column types, so target table types must be defined explicitly when loading with COPY.</p>
     </div>
   
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Confirm the exact set of date formats present in open_date across all three months before writing the TO_DATE logic.</li><li>Define the ORDER BY rule that determines which row should be kept as &#39;first&#39; when deduplicating case_id in the ROW_NUMBER() rewrite.</li><li>Align column order and names across all three input sources before converting the Union to UNION ALL.</li><li>Decide whether empty-string and NULL member_id values should both map to &#39;UNKNOWN&#39; and encode that explicitly.</li><li>Spot-check INITCAP output against the original TitleCase results for status values.</li><li>Define target table schema and data types for the Redshift COPY load of the CSV inputs.</li></ol>
+  <ol class="steps"><li>Document every date format present in the open_date column and write explicit TO_DATE logic for each.</li><li>Define an explicit ORDER BY to replicate the &#39;keep first row&#39; behavior of Unique <span class="ref" title="Unique (tool 7)">7</span> using ROW_NUMBER().</li><li>Align column names and order across all three input sources before writing the UNION ALL that replaces Union <span class="ref" title="Union (tool 5)">5</span>.</li><li>Decide whether member_id should treat empty strings and NULLs the same, and encode that explicitly.</li><li>Spot-check INITCAP output against the original TitleCase results for the status field.</li><li>Define explicit column data types for the Redshift tables that will receive the COPY-loaded CSV data.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span><span class="ref" title="Input Data (tool 3)">3</span><span class="ref" title="Select (tool 4)">4</span><span class="ref" title="Union (tool 5)">5</span> Three monthly CSV files are read in, one column is renamed [4], and all three are stacked together with the Union [5].</li>
-    <li><span class="ref" title="Formula (tool 6)">6</span> The Formula [6] tool parses dates in several formats, fills in missing member IDs, and standardizes status text.</li>
-    <li><span class="ref" title="Unique (tool 7)">7</span> The Unique [7] tool removes duplicate cases, keeping only the first row seen for each case ID.</li>
-    <li><span class="ref" title="Summarize (tool 9)">9</span><span class="ref" title="Sort (tool 10)">10</span><span class="ref" title="Output Data (tool 11)">11</span> Remaining cases are counted by month and program, sorted, and written out as the final trend report.</li>
+    <li><span class="ref" title="Input Data (tool 1)">1</span><span class="ref" title="Input Data (tool 2)">2</span><span class="ref" title="Input Data (tool 3)">3</span><span class="ref" title="Select (tool 4)">4</span><span class="ref" title="Union (tool 5)">5</span> Three monthly CSV files are loaded, one column is renamed, and all three are stacked together into a single dataset using Union [5].</li>
+    <li><span class="ref" title="Formula (tool 6)">6</span> Formula [6] creates several new fields: it parses open dates in multiple formats, flags empty member IDs, and standardizes the status text.</li>
+    <li><span class="ref" title="Unique (tool 7)">7</span> Unique [7] removes duplicate cases by case_id, keeping only the first occurrence of each.</li>
+    <li><span class="ref" title="Summarize (tool 9)">9</span><span class="ref" title="Sort (tool 10)">10</span><span class="ref" title="Output Data (tool 11)">11</span> Summarize [9] counts cases by month and program, Sort [10] orders the results by month, and Output Data [11] writes the final trend report.</li>
   </ul>
   
 
