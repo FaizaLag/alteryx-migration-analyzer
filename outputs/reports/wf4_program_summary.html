@@ -100,7 +100,7 @@
 
   <h2>In short</h2>
   
-    <p class="summary">This workflow filters records to a single program (Care Navigation) and then summarizes the result by summing savings and counting claims. It scores 1 out of 10, meaning it is a direct translation to SQL. Both tools used have simple, well-known SQL equivalents, so there are no design decisions or rework needed.</p>
+    <p class="summary">This macro filters claims data to the &#39;Care Navigation&#39; program and then summarizes the results by program, summing savings and counting claim IDs. It scored 1 out of 10, meaning it translates to Redshift SQL almost directly with no significant rework needed. The only two scored tools, Filter <span class="ref" title="Filter (tool 3)">3</span> and Summarize <span class="ref" title="Summarize (tool 6)">6</span>, both map cleanly to standard SQL (WHERE clause and GROUP BY with aggregates).</p>
     <p class="ai-note">Written by AI (claude-sonnet-5) from facts extracted by code. Every tool it cites was checked against the workflow.</p>
   
 
@@ -133,15 +133,19 @@
   
   <h2>Main risks</h2>
   
+    <div class="risk low">
+      <h3>No significant risks identified<span class="sev low">low</span></h3>
+      <p>The facts show no gotchas and only low-difficulty tools, so there is nothing flagged that would complicate migration.</p>
+    </div>
+  
 
   <h2>Next steps</h2>
-  <ol class="steps"><li>Translate the Filter <span class="ref" title="Filter (tool 3)">3</span> into a WHERE clause for program = &#39;Care Navigation&#39;.</li><li>Translate the Summarize <span class="ref" title="Summarize (tool 6)">6</span> into a GROUP BY query with SUM(savings) and COUNT(claim_id).</li><li>Confirm the exact field names and data types for program, savings, and claim_id before writing the SQL.</li><li>Validate the Redshift output against the original workflow output for the Care Navigation program to confirm matching totals.</li></ol>
+  <ol class="steps"><li>Translate the Filter <span class="ref" title="Filter (tool 3)">3</span> condition into a SQL WHERE clause.</li><li>Translate the Summarize <span class="ref" title="Summarize (tool 6)">6</span> step into a GROUP BY query with SUM(savings) and COUNT(claim_id).</li><li>Confirm what tools 2, 4, 5, and 7 do, since the facts only describe their position in the data flow, not their function.</li><li>Validate the Redshift query output against the original macro&#39;s results using a sample dataset.</li></ol>
 
   <h2>What the workflow does</h2>
   <ul class="parts">
-    <li><span class="ref" title="tool (tool 2)">2</span><span class="ref" title="Filter (tool 3)">3</span><span class="ref" title="tool (tool 5)">5</span> Data is passed through and filtered down to only records where program equals Care Navigation using the Filter [3].</li>
-    <li><span class="ref" title="Summarize (tool 6)">6</span> The filtered data is grouped by program, summing savings and counting claim IDs using the Summarize [6].</li>
-    <li><span class="ref" title="tool (tool 7)">7</span> The summarized results are passed on as output.</li>
+    <li><span class="ref" title="Filter (tool 3)">3</span> Filters the dataset down to rows where program equals &#39;Care Navigation&#39;.</li>
+    <li><span class="ref" title="Summarize (tool 6)">6</span> Groups the filtered data by program, summing the savings field and counting claim_id.</li>
   </ul>
   
 

@@ -1,44 +1,42 @@
 {
-  "summary": "This workflow filters records to a single program (Care Navigation) and then summarizes the result by summing savings and counting claims. It scores 1 out of 10, meaning it is a direct translation to SQL. Both tools used have simple, well-known SQL equivalents, so there are no design decisions or rework needed.",
+  "summary": "This macro filters claims data to the 'Care Navigation' program and then summarizes the results by program, summing savings and counting claim IDs. It scored 1 out of 10, meaning it translates to Redshift SQL almost directly with no significant rework needed. The only two scored tools, Filter [3] and Summarize [6], both map cleanly to standard SQL (WHERE clause and GROUP BY with aggregates).",
   "key_components": [
     {
       "tools": [
-        2,
-        3,
-        5
+        3
       ],
-      "description": "Data is passed through and filtered down to only records where program equals Care Navigation using the Filter [3]."
+      "description": "Filters the dataset down to rows where program equals 'Care Navigation'."
     },
     {
       "tools": [
         6
       ],
-      "description": "The filtered data is grouped by program, summing savings and counting claim IDs using the Summarize [6]."
-    },
-    {
-      "tools": [
-        7
-      ],
-      "description": "The summarized results are passed on as output."
+      "description": "Groups the filtered data by program, summing the savings field and counting claim_id."
     }
   ],
-  "risks": [],
+  "risks": [
+    {
+      "title": "No significant risks identified",
+      "severity": "low",
+      "tools": [
+        3,
+        6
+      ],
+      "detail": "The facts show no gotchas and only low-difficulty tools, so there is nothing flagged that would complicate migration."
+    }
+  ],
   "next_steps": [
-    "Translate the Filter [3] into a WHERE clause for program = 'Care Navigation'.",
-    "Translate the Summarize [6] into a GROUP BY query with SUM(savings) and COUNT(claim_id).",
-    "Confirm the exact field names and data types for program, savings, and claim_id before writing the SQL.",
-    "Validate the Redshift output against the original workflow output for the Care Navigation program to confirm matching totals."
+    "Translate the Filter [3] condition into a SQL WHERE clause.",
+    "Translate the Summarize [6] step into a GROUP BY query with SUM(savings) and COUNT(claim_id).",
+    "Confirm what tools 2, 4, 5, and 7 do, since the facts only describe their position in the data flow, not their function.",
+    "Validate the Redshift query output against the original macro's results using a sample dataset."
   ],
   "_check": {
     "model": "claude-sonnet-5",
     "usage": {
       "input_tokens": 1063,
-      "output_tokens": 429
+      "output_tokens": 1184
     },
-    "uncited_or_invented_tool_ids": [
-      "2",
-      "5",
-      "7"
-    ]
+    "uncited_or_invented_tool_ids": []
   }
 }

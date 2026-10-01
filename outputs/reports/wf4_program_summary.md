@@ -4,7 +4,7 @@
 
 ## In short
 
-This workflow filters records to a single program (Care Navigation) and then summarizes the result by summing savings and counting claims. It scores 1 out of 10, meaning it is a direct translation to SQL. Both tools used have simple, well-known SQL equivalents, so there are no design decisions or rework needed.
+This macro filters claims data to the 'Care Navigation' program and then summarizes the results by program, summing savings and counting claim IDs. It scored 1 out of 10, meaning it translates to Redshift SQL almost directly with no significant rework needed. The only two scored tools, Filter [3] and Summarize [6], both map cleanly to standard SQL (WHERE clause and GROUP BY with aggregates).
 
 *Written by AI (claude-sonnet-5) from facts extracted by code; every cited tool was checked.*
 
@@ -33,12 +33,15 @@ flowchart LR
 
 ## Main risks
 
+**No significant risks identified** (low)  
+The facts show no gotchas and only low-difficulty tools, so there is nothing flagged that would complicate migration.
+
 ## Next steps
 
-1. Translate the Filter [3] into a WHERE clause for program = 'Care Navigation'.
-2. Translate the Summarize [6] into a GROUP BY query with SUM(savings) and COUNT(claim_id).
-3. Confirm the exact field names and data types for program, savings, and claim_id before writing the SQL.
-4. Validate the Redshift output against the original workflow output for the Care Navigation program to confirm matching totals.
+1. Translate the Filter [3] condition into a SQL WHERE clause.
+2. Translate the Summarize [6] step into a GROUP BY query with SUM(savings) and COUNT(claim_id).
+3. Confirm what tools 2, 4, 5, and 7 do, since the facts only describe their position in the data flow, not their function.
+4. Validate the Redshift query output against the original macro's results using a sample dataset.
 
 ## Every gotcha found
 
