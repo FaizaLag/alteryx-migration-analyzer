@@ -48,8 +48,13 @@ def group_gotchas(findings):
 
 
 def build(name, rules, env):
-    parsed, score, gotchas, ai = (_load("parsed", name), _load("scores", name),
-                                  _load("gotchas", name), _load("ai", name))
+    """Report for a workflow already processed into the outputs/ folders."""
+    return build_from(_load("parsed", name), _load("scores", name),
+                      _load("gotchas", name), _load("ai", name), rules, env)
+
+
+def build_from(parsed, score, gotchas, ai, rules, env):
+    """Report from data held in memory (used by the app)."""
     details = {t["tool_id"]: tool_detail(t) for t in parsed["tools"]}
     tools = [{**t, "does": details.get(t["tool_id"], "")} for t in score["tools"] if not t.get("interface")]
     names = {t["tool_id"]: t["name"] for t in tools}

@@ -2,3 +2,4 @@ pyyaml>=6.0
 anthropic
 python-dotenv
 jinja2
+streamlit>=1.50
