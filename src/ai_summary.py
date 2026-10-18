@@ -1,3 +1,4 @@
+
 """Ask Claude to explain a workflow's migration assessment in plain English.
 
 Code extracts the facts (parser, score, gotchas); the AI only explains them.
@@ -31,8 +32,12 @@ def _load(folder, name):
 
 
 def build_facts(name):
+    """Facts for a workflow already processed into the outputs/ folders."""
+    return build_facts_from(_load(PARSED, name), _load(SCORES, name), _load(GOTCHAS, name))
+
+
+def build_facts_from(parsed, score, gotchas):
     """The compact, privacy-safe package of facts the AI is allowed to use."""
-    parsed, score, gotchas = _load(PARSED, name), _load(SCORES, name), _load(GOTCHAS, name)
 
     details = {t["tool_id"]: tool_detail(t) for t in parsed["tools"]}
     tools = []
@@ -138,4 +143,4 @@ if __name__ == "__main__":
         if "--save" in flags:
             out = Path("outputs/ai") / f"{n}.json"
             out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+            out.write_text(json.dumps(result, indent=2), encoding="utf-8")           
