@@ -11,12 +11,18 @@ from pathlib import Path
 
 import streamlit as st
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+APP_DIR = Path(__file__).parent
+os.chdir(APP_DIR)  # rules, templates and samples are found relative to the app, wherever it's launched from
+sys.path.insert(0, str(APP_DIR / "src"))
 
 from pipeline import WorkflowError, analyze, load_all_rules, render_report  # noqa: E402
 from report import BANDS, group_gotchas, score_level  # noqa: E402
 
 SAMPLES = Path("tests/workflows")
+SAVED_AI = Path("outputs/ai")
+# Online demo: set DEMO_MODE = "true" in the hosting service's secrets. Live AI is off;
+# samples show their saved AI summaries instead, so the demo never spends API credits.
+DEMO = os.getenv("DEMO_MODE", "").strip().lower() in ("1", "true", "yes")
 COLORS = {"low": "#2e7d4f", "medium": "#c99a1a", "high": "#b02a37"}
 
 st.set_page_config(page_title="Alteryx Migration Analyzer", page_icon="🔎", layout="wide")
@@ -88,8 +94,14 @@ with st.sidebar:
         "The score comes from the rules, not the AI. The workflow file stays on this computer; "
         "only a summary of facts (file names, no paths) is sent if you request the AI explanation.")
 
+if DEMO:
+    st.info("**Online demo.** Try the sample workflows. Uploaded files are processed on a hosted server, "
+            "so please don't upload confidential workflows. To analyze your own files privately, "
+            "[run it on your computer](https://github.com/FaizaLag/alteryx-migration-analyzer#run-it).")
+
 source = st.radio("Workflow", ["Upload a file", "Try a sample"], horizontal=True)
 data = name = None
+from_sample = False
 if source == "Upload a file":
     up = st.file_uploader("Alteryx workflow or macro", type=["yxmd", "yxmc"])
     if up:
@@ -99,6 +111,7 @@ else:
     if samples:
         name = st.selectbox("Sample workflow", samples)
         data = (SAMPLES / name).read_bytes()
+        from_sample = True
     else:
         st.info("No sample workflows found in tests/workflows.")
 
@@ -158,32 +171,48 @@ with tab_tools:
           "In Redshift": t.get("redshift") or ""} for t in score["tools"] if not t.get("interface")],
         width="stretch", hide_index=True)
 
+def show_ai(ai):
+    bad = ai["_check"]["uncited_or_invented_tool_ids"]
+    if bad:
+        st.warning(f"The AI cited tools that aren't in this workflow: {', '.join(bad)}. Treat its text with care.")
+    else:
+        st.success("Citation check passed: every tool the AI mentions exists in the workflow.")
+    st.markdown(ai["summary"])
+    st.markdown("**Main risks**")
+    for r in ai["risks"]:
+        st.markdown(f"- **{r['title']}** ({r['severity']}): {r['detail']}")
+    st.markdown("**Next steps**")
+    for i, s in enumerate(ai["next_steps"], 1):
+        st.markdown(f"{i}. {s}")
+
+
 ai_store = st.session_state.setdefault("ai", {})
+saved = SAVED_AI / f"{Path(name).stem}.json"
+if DEMO and from_sample and saved.exists() and key not in ai_store:
+    import json
+    ai_store[key] = json.loads(saved.read_text(encoding="utf-8"))
+
 with tab_ai:
-    st.caption("Plain-English summary, risks, and next steps, written by AI from the facts above. "
-               "Each click uses API credits.")
-    if key not in ai_store and st.button("Explain with AI"):
-        with st.spinner("Asking Claude..."):
-            ai, err = run_ai(result)
-        if err:
-            st.error(err)
+    if DEMO:
+        if key in ai_store:
+            st.caption(f"Generated earlier by {ai_store[key]['_check']['model']} for this sample. "
+                       "Live AI explanations are turned off in the online demo.")
         else:
-            ai_store[key] = ai  # kept for this session, so switching tabs doesn't call the API again
-            st.rerun()
-    ai = ai_store.get(key)
-    if ai:
-        bad = ai["_check"]["uncited_or_invented_tool_ids"]
-        if bad:
-            st.warning(f"The AI cited tools that aren't in this workflow: {', '.join(bad)}. Treat its text with care.")
-        else:
-            st.success("Citation check passed: every tool the AI mentions exists in the workflow.")
-        st.markdown(ai["summary"])
-        st.markdown("**Main risks**")
-        for r in ai["risks"]:
-            st.markdown(f"- **{r['title']}** ({r['severity']}): {r['detail']}")
-        st.markdown("**Next steps**")
-        for i, s in enumerate(ai["next_steps"], 1):
-            st.markdown(f"{i}. {s}")
+            st.info("Live AI explanations are turned off in the online demo. Run the app on your own "
+                    "computer with your own API key to explain uploaded workflows.")
+    else:
+        st.caption("Plain-English summary, risks, and next steps, written by AI from the facts above. "
+                   "Each click uses API credits.")
+        if key not in ai_store and st.button("Explain with AI"):
+            with st.spinner("Asking Claude..."):
+                ai, err = run_ai(result)
+            if err:
+                st.error(err)
+            else:
+                ai_store[key] = ai  # kept for this session, so switching tabs doesn't call the API again
+                st.rerun()
+    if key in ai_store:
+        show_ai(ai_store[key])
 
 with tab_report:
     html, md = render_report(result, ai_store.get(key), rules())
