@@ -91,8 +91,11 @@ with st.sidebar:
         "for known migration issues (`rules/formula_gotchas.yaml`).\n"
         "3. **AI explains the facts**, only when you ask. Every tool it cites is checked "
         "against the workflow.\n\n"
-        "The score comes from the rules, not the AI. The workflow file stays on this computer; "
-        "only a summary of facts (file names, no paths) is sent if you request the AI explanation.")
+        "The score comes from the rules, not the AI. "
+        + ("In this online demo, files are processed on the hosting server and live AI is off."
+           if DEMO else
+           "The workflow file stays on this computer; only a summary of facts (file names, no paths) "
+           "is sent if you request the AI explanation."))
 
 if DEMO:
     st.info("**Online demo.** Try the sample workflows. Uploaded files are processed on a hosted server, "
