@@ -1,8 +1,10 @@
 # Alteryx Migration Analyzer
 
+**Turns Alteryx workflows into plain-English migration assessments for Amazon Redshift: what each workflow does, how hard it is to rebuild in SQL, which logic won't translate cleanly, and what to do about it.**
+
 **[Try the live demo](https://alteryx-migration-analyzer.streamlit.app/)** · samples included, no install needed
 
-**Turns Alteryx workflows into plain-English migration assessments for Amazon Redshift: what each workflow does, how hard it is to rebuild in SQL, which logic won't translate cleanly, and what to do about it.**
+**[Watch the 2-minute demo](https://www.youtube.com/watch?v=DiiojtaZb7U)**
 
 Matched expert difficulty ratings on all 4 test workflows and flagged all 14 planted migration risks.
 
