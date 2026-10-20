@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
+from defusedxml.ElementTree import parse as safe_parse
+
 # Tools that build a macro's interface; they hold no data logic to migrate.
 INTERFACE_TOOLS = {"Tab", "ControlParam", "Action", "MacroInput", "MacroOutput",
                    "TextBox", "DropDown", "CheckBox", "ListBox", "NumericUpDown"}
@@ -19,7 +21,8 @@ INTERFACE_TOOLS = {"Tab", "ControlParam", "Action", "MacroInput", "MacroOutput",
 
 def load_workflow(path):
     """Read a workflow file and return the top of its XML tree."""
-    return ET.parse(path).getroot()
+    # defusedxml: safe against XML tricks a malicious file could contain
+    return safe_parse(path, forbid_dtd=True).getroot()
 
 
 # ---------- small helpers ----------

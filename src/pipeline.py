@@ -5,6 +5,9 @@ work in one call, without writing files, so an uploaded workflow can flow
 straight through.
 """
 import xml.etree.ElementTree as ET
+
+from defusedxml import DefusedXmlException
+from defusedxml.ElementTree import fromstring as safe_fromstring
 from pathlib import Path
 
 import yaml
@@ -33,7 +36,12 @@ def parse_bytes(data, file_name):
     if len(data) > MAX_BYTES:
         raise WorkflowError("The file is larger than 20 MB, which is unusual for a workflow.")
     try:
-        root = ET.fromstring(data)
+        # defusedxml blocks XML tricks (entity expansion, external references) that real
+        # Alteryx files never use; forbid_dtd rejects any DOCTYPE declaration outright.
+        root = safe_fromstring(data, forbid_dtd=True)
+    except DefusedXmlException:
+        raise WorkflowError("This file uses XML features Alteryx workflows don't (such as a DOCTYPE "
+                            "or entity definitions), so it wasn't processed.")
     except ET.ParseError:
         raise WorkflowError("This file isn't valid XML, so it doesn't look like an Alteryx workflow.")
     if root.tag != "AlteryxDocument" or root.find("Nodes") is None:

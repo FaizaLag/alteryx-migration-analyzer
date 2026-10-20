@@ -3,3 +3,4 @@ anthropic
 python-dotenv
 jinja2
 streamlit>=1.50
+defusedxml
