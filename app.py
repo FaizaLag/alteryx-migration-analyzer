@@ -19,6 +19,8 @@ from pipeline import WorkflowError, analyze, load_all_rules, render_report  # no
 from report import BANDS, group_gotchas, score_level  # noqa: E402
 
 SAMPLES = Path("tests/workflows")
+# Samples offered in the app, first one is the default. WF1 and WF2 stay in tests/ for evaluation.
+APP_SAMPLES = ["wf4_savings_report.yxmd", "wf3_monthly_trend.yxmd"]
 SAVED_AI = Path("outputs/ai")
 # Online demo: set DEMO_MODE = "true" in the hosting service's secrets. Live AI is off;
 # samples show their saved AI summaries instead, so the demo never spends API credits.
@@ -110,7 +112,7 @@ if source == "Upload a file":
     if up:
         data, name = up.getvalue(), up.name
 else:
-    samples = sorted(p.name for p in SAMPLES.glob("*.yx*")) if SAMPLES.exists() else []
+    samples = [n for n in APP_SAMPLES if (SAMPLES / n).exists()]
     if samples:
         name = st.selectbox("Sample workflow", samples)
         data = (SAMPLES / name).read_bytes()
